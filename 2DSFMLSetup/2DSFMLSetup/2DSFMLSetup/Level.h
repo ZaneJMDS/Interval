@@ -13,6 +13,7 @@ public:
 	// Tiles
 	std::vector<sf::RectangleShape*> level_tiles; // Tiles with no collision
 	std::vector<sf::RectangleShape*> level_wall_tiles; // Tiles with collision
+	std::vector<sf::RectangleShape*> level_platform_tiles; // Tiles with top collision
 
 	char level_array[level_width][level_height];
 
