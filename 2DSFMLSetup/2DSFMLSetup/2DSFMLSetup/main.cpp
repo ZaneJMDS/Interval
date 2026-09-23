@@ -114,15 +114,15 @@ int main()
         if (gravity)
         {
             playerY_vel = UpdatePlayer(playerY_vel, 1.f, 0.0198f);
-            player.Gravity(playerY_vel);
         }
 
         // Reversed gravtity
         else
         {
             playerY_vel = UpdatePlayer(playerY_vel, -1.f, 0.0198f);
-            player.Gravity(playerY_vel);
         }
+
+        player.Gravity(playerY_vel);
 
         // COLLISION PROCESSING - Y
         // Walls
@@ -141,48 +141,96 @@ int main()
                 }
             }
         }
+        
         // Platforms
         for (int i = 0; i < MainLevel.level_platform_tiles.size(); i++)
         {
-            // CRASHES 
             if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_platform_tiles[i]->getGlobalBounds()))
             {
-                Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
+                // Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
                 playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
 
                 // VERTICAL MOVEMENT
-                // Fall through
+                // Jump
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+                {
+                    playerY_vel = -2.5f;
+                }
+
+                // Down through platform
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
                 {
-                    playerY_vel = 5.f;
+                    playerY_vel = 2.5f;
+                }
+
+                // Only collide with platform if player isn't moving up or down
+                if (playerY_vel == 0.f)
+                {
+                    Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
                 }
             }
+        }
+
+        // Boxes
+        for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
+        {
+            if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
+            {
+                Collisions::ResolveYCollisions(MainLevel.level_box_tiles[i], &player.player_shape, false);
+            }
+        }
+
+        // Fall
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+        {
+            playerY_vel = 5.f;
         }
 
         // Move on X
         player.Move(playerX_vel);
 
         // COLLISION PROCESSING - X
+        // Player collides with WALL
         for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
         {
+            // Stop the player
             if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
             {
                 Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
             }
         }
 
+        // Player collides with BOX
+        for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
+        {
+            // Move the box
+            if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
+            {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+                {
+                    Collisions::ResolveXCollisions(MainLevel.level_box_tiles[i], &player.player_shape, false);
+                }
+            }
+        }
+
         window.clear();
 
-        // Draw all the level tiles
+        // Draw all WALL tiles
         for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
+        {
+            window.draw(*MainLevel.level_wall_tiles[i]);
+        }
+
+        // Draw all PLATFORM tiles
+        for (int i = 0; i < MainLevel.level_platform_tiles.size(); i++)
         {
             window.draw(*MainLevel.level_platform_tiles[i]);
         }
 
-        // Draw all level platform tiles
-        for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
+        // Draw all BOX tiles
+        for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
         {
-            window.draw(*MainLevel.level_platform_tiles[i]);
+            window.draw(*MainLevel.level_box_tiles[i]);
         }
 
         // Draw menu buttons

@@ -68,12 +68,24 @@ void Level::LoadLevel(std::string _file_path)
 			if (level_array[x][y] == 'p')
 			{
 				// Spawn a box at current location
-				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
+				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 16 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 				NewBox->setFillColor(sf::Color::Blue);
 
 				// Collider logic
 				level_platform_tiles.push_back(NewBox);
+			}
+
+			// Box
+			if (level_array[x][y] == 'b')
+			{
+				// Spawn a box at current location
+				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
+				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
+				NewBox->setFillColor(sf::Color::Yellow);
+
+				// Collider logic
+				level_box_tiles.push_back(NewBox);
 			}
 		}
 	}
