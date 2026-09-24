@@ -4,6 +4,7 @@
 #include "Physics.h"
 #include "Button.h"
 #include "Player.h"
+#include "Audio.h"
 
 // Update player's position
 float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt)
@@ -20,11 +21,18 @@ int main()
 
     Player player;
 
+    float playerY_vel = 0.f;
+    float playerX_vel = 0.f;
+
+    // Audio
+    Audio jump_sound("jump.mp3");
+
     // Menu Buttons
     std::vector<Button> buttons;
 
     const int button_count = 2;
 
+    // Create every menu button
     for (int i = 0; i < button_count; i++)
     {
         // Makes button with role, location, and colour 
@@ -33,9 +41,7 @@ int main()
     }
 
     bool gravity = true; // Change the direction of gravity
-
-    float playerY_vel = 0.f;
-    float playerX_vel = 0.f;
+    bool between_platform = false; // If the player is currently in between platforms
 
     // Load the first level
     Level MainLevel(15, 10);
@@ -138,6 +144,7 @@ int main()
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                 {
                     playerY_vel = -2.5f;
+                    jump_sound.Play();
                 }
             }
         }
@@ -147,27 +154,30 @@ int main()
         {
             if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_platform_tiles[i]->getGlobalBounds()))
             {
-                // Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
-                playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
-
                 // VERTICAL MOVEMENT
                 // Jump
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                 {
                     playerY_vel = -2.5f;
+                    between_platform = true;
                 }
 
                 // Down through platform
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
                 {
                     playerY_vel = 2.5f;
+                    between_platform = true;
+
                 }
 
-                // Only collide with platform if player isn't moving up or down
-                if (playerY_vel == 0.f)
+                // Only collide with platform if player isn't moving up or down and their velocity is 0
+                if (!between_platform)
                 {
+                    playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
                     Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
                 }
+
+                // If player stops coliding with the platform set 
             }
         }
 
@@ -183,7 +193,7 @@ int main()
         // Fall
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
         {
-            playerY_vel = 5.f;
+            playerY_vel = -2.5f;
         }
 
         // Move on X

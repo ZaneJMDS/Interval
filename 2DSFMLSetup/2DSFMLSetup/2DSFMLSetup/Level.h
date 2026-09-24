@@ -15,6 +15,7 @@ public:
 	std::vector<sf::RectangleShape*> level_wall_tiles; // Tiles with collision
 	std::vector<sf::RectangleShape*> level_platform_tiles; // Tiles to jump and fall through with no side collision
 	std::vector<sf::RectangleShape*> level_box_tiles; // Tiles the player can move
+	std::vector<sf::RectangleShape*> level_jump_tiles; // Tiles that cause the player to jump
 
 	char level_array[level_width][level_height];
 
