@@ -19,6 +19,10 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 1280, 720 }), "Interval");
     window.setFramerateLimit(60);
 
+    sf::Texture background_txt("background.jpg");
+    sf::RectangleShape background({1280, 720 });
+    background.setTexture(&background_txt);
+
     Player player;
 
     float playerY_vel = 0.f;
@@ -53,7 +57,7 @@ int main()
         // Makes button with location, colour, text 
         Button NewButton({ 100.f * i, 650.f }, sf::Color::Green, button_roles[i]);
         buttons.push_back(NewButton);
-        button_roles[i].setPosition({ 125.f * i, 675.f });
+        button_roles[i].setPosition({ 100.f * i + 10.f, 670.f });
         button_roles[i].setFillColor(sf::Color::Black);
     }
 
@@ -91,9 +95,9 @@ int main()
             }
 
             // Left MB pressed
-            if (event.type == sf::Event::MouseButtonPressed)
+            if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>())
             {
-                if (event.mouseButton.button == sf::Mouse::Left)
+                if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
                 {
                     // Did user click on a button
                     for (int i = 0; i < button_count; i++)
@@ -172,8 +176,15 @@ int main()
                 // Jump
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                 {
-                    playerY_vel = -2.5f;
-                    jump_sound.Play();
+                    std::cout << "\nPlayer: " << player.player_shape.getPosition().y;
+                    std::cout << "\nWall: " << MainLevel.level_wall_tiles[i]->getPosition().y;
+
+                    // Player can only jump off if they are on top of the block
+                    if (player.player_shape.getPosition().y < MainLevel.level_wall_tiles[i]->getPosition().y)
+                    {
+                        playerY_vel = -2.5f;
+                        jump_sound.Play();
+                    }
                 }
             }
 
@@ -244,6 +255,15 @@ int main()
             }
         }
 
+        // Spikes
+        for (int i = 0; i < MainLevel.level_spike_tiles.size(); i++)
+        {
+            if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_spike_tiles[i]->getGlobalBounds()))
+            {
+                player.ResetPosition();
+            }
+        }
+
         // Move on X
         player.Move(playerX_vel);
 
@@ -283,6 +303,8 @@ int main()
 
         window.clear();
 
+        window.draw(background);
+
         // Draw all WALL tiles
         for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
         {
@@ -301,10 +323,16 @@ int main()
             window.draw(*MainLevel.level_box_tiles[i]);
         }
 
-        // Draw all Drum tiles
+        // Draw all DRUM tiles
         for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
         {
             window.draw(*MainLevel.level_drum_tiles[i]);
+        }
+
+        // Draw all SPIKE tiles
+        for (int i = 0; i < MainLevel.level_spike_tiles.size(); i++)
+        {
+            window.draw(*MainLevel.level_spike_tiles[i]);
         }
 
         // Draw menu buttons and text

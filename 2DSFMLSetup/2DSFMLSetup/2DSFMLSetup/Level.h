@@ -16,6 +16,7 @@ public:
 	std::vector<sf::RectangleShape*> level_platform_tiles; // Tiles to jump and fall through with no side collision
 	std::vector<sf::RectangleShape*> level_box_tiles; // Tiles the player can move
 	std::vector<sf::RectangleShape*> level_drum_tiles; // Tiles that cause the player to launch with a high velocity
+	std::vector<sf::RectangleShape*> level_spike_tiles; // Tiles that kill the player
 
 	char level_array[level_width][level_height];
 
