@@ -19,3 +19,8 @@ Player::Player()
 Player::~Player()
 {
 }
+
+void Player::Jump(float _playerY_vel)
+{
+    player_shape.move({ 0.f, _playerY_vel });
+}

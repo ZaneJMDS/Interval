@@ -29,25 +29,44 @@ int main()
 
     // Menu Buttons
     std::vector<Button> buttons;
+    const int button_count = 3;
 
-    const int button_count = 2;
+    // Text and font set up
+    sf::Font Font1;
+    if (!Font1.openFromFile("PressStart2P-Regular.ttf"))
+    {
+        throw "Font could not be loaded";
+    }
+
+    const int text_size = 16;
+
+    // Create text for the buttons
+    sf::Text PlayText(Font1, "Play", text_size);
+    sf::Text CreditText(Font1, "Credit", text_size);
+    sf::Text QuitText(Font1, "Quit", text_size);
+
+    sf::Text button_roles[button_count] = {PlayText, CreditText, QuitText };
 
     // Create every menu button
     for (int i = 0; i < button_count; i++)
     {
-        // Makes button with role, location, and colour 
-        Button NewButton({ 100.f * i, 600.f }, sf::Color::Green);
+        // Makes button with location, colour, text 
+        Button NewButton({ 100.f * i, 650.f }, sf::Color::Green, button_roles[i]);
         buttons.push_back(NewButton);
+        button_roles[i].setPosition({ 125.f * i, 675.f });
+        button_roles[i].setFillColor(sf::Color::Black);
     }
 
-    bool gravity = true; // Change the direction of gravity
+    bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
 
     // Load the first level
     Level MainLevel(15, 10);
 
+    // While the game is running
     while (window.isOpen())
     {
+        // Only do these events if the user has the window selected
         while (const std::optional event = window.pollEvent())
         {
             // If close button pressed closed the window
@@ -72,24 +91,33 @@ int main()
             }
 
             // Left MB pressed
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+            if (event.type == sf::Event::MouseButtonPressed)
             {
-                // Did user click on a button
-                for (int i = 0; i < button_count; i++)
+                if (event.mouseButton.button == sf::Mouse::Left)
                 {
-                    // Menu
-                    if (buttons[i].m_ButtonShape.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(window))))
+                    // Did user click on a button
+                    for (int i = 0; i < button_count; i++)
                     {
-                        // Start game
-                        if (i == 0)
+                        // Menu
+                        if (buttons[i].m_ButtonShape.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(window))))
                         {
-                            
-                        }
+                            // Start game
+                            if (i == 0)
+                            {
 
-                        // Exit
-                        if (i == 1)
-                        {
-                            return 0;
+                            }
+
+                            // Credits
+                            if (i == 1)
+                            {
+                                std::cout << "Game made by Zane";
+                            }
+
+                            // End game
+                            if (i == 2)
+                            {
+                                return 0;
+                            }
                         }
                     }
                 }
@@ -134,6 +162,7 @@ int main()
         // Walls
         for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
         {
+            // with Player
             if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
             {
                 Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
@@ -147,6 +176,12 @@ int main()
                     jump_sound.Play();
                 }
             }
+
+            // with Box
+            //if (MainLevel.level_box_tiles[i]->getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+            //{
+            //    // Collisions::ResolveYCollisions(MainLevel.level_box_tiles[i], MainLevel.level_wall_tiles[i], false);
+            //}
         }
         
         // Platforms
@@ -193,7 +228,20 @@ int main()
         // Fall
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
         {
-            playerY_vel = -2.5f;
+            playerY_vel = 5.0f;
+        }
+
+        // Drum
+        for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
+        {
+            if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+            {
+                Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
+
+                // VERTICAL MOVEMENT
+                playerY_vel = -5.0f;
+                jump_sound.Play();
+            }
         }
 
         // Move on X
@@ -223,6 +271,16 @@ int main()
             }
         }
 
+        // Player collides with DRUM
+        for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
+        {
+            // Stop the player
+            if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+            {
+                Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
+            }
+        }
+
         window.clear();
 
         // Draw all WALL tiles
@@ -243,10 +301,17 @@ int main()
             window.draw(*MainLevel.level_box_tiles[i]);
         }
 
-        // Draw menu buttons
+        // Draw all Drum tiles
+        for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
+        {
+            window.draw(*MainLevel.level_drum_tiles[i]);
+        }
+
+        // Draw menu buttons and text
         for (int i = 0; i < button_count; i++)
         {
             window.draw(buttons[i].m_ButtonShape);
+            window.draw(button_roles[i]);
         }
 
         // Draw player object
