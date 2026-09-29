@@ -5,6 +5,7 @@
 #include "Button.h"
 #include "Player.h"
 #include "Audio.h"
+#include "ParticleSystem.h"
 
 // Update player's position
 float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt)
@@ -19,10 +20,19 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 1280, 720 }), "Interval");
     window.setFramerateLimit(60);
 
+    // Background settings
     sf::Texture background_txt("background.jpg");
     sf::RectangleShape background({1280, 720 });
     background.setTexture(&background_txt);
 
+    // Particle config
+    // create the particle system
+    ParticleSystem particles(1000);
+
+    // create a clock to track the elapsed time
+    sf::Clock clock;
+
+    // Player config
     Player player;
 
     float playerY_vel = 0.f;
@@ -127,6 +137,14 @@ int main()
                 }
             }
         }
+
+        // make the particle system emitter follow the mouse
+        sf::Vector2i mouse = sf::Mouse::getPosition(window);
+        particles.setEmitter(window.mapPixelToCoords(mouse));
+
+        // update it
+        sf::Time elapsed = clock.restart();
+        particles.update(elapsed);
 
         playerX_vel = 0.f; // Reset player's X velocity if they stop moving left and right
 
@@ -344,6 +362,10 @@ int main()
 
         // Draw player object
         window.draw(player.player_shape);
+
+        // Draw particles
+        window.draw(particles);
+
         window.display();
     }
 }
