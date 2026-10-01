@@ -17,6 +17,10 @@ public:
 	void Gravity(float _playerY_vel) { player_shape.move({ 0.f, _playerY_vel }); }
 	void Jump(float _playerY_vel);
 	void Move(float _playerX_vel) { player_shape.move({ _playerX_vel, 0.f }); }
+
+	// Update player's position
+	float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt);
+
 	sf::RectangleShape GetPlayerShape() { return player_shape; }
 
 private:

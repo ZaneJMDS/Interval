@@ -24,3 +24,9 @@ void Player::Jump(float _playerY_vel)
 {
     player_shape.move({ 0.f, _playerY_vel });
 }
+
+float Player::UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt)
+{
+    if (_playerYvel < 4.f) { _playerYvel += _Yvelocity * _dt; }
+    return _playerYvel;
+}

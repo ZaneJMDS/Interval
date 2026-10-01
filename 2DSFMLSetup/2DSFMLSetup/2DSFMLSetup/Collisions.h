@@ -23,7 +23,7 @@ public:
 		if (entityACenter.x >= entityBCenter.x)
 		{
 			float offset = (_objB->getGlobalBounds().position.x + _objB->getGlobalBounds().size.x) - _objA->getGlobalBounds().position.x;
-			_objA->move(sf::Vector2f(offset, 0));
+			_objA->move({ offset, 0 });
 		}
 	}
 
