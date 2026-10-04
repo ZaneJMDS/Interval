@@ -8,7 +8,7 @@ Player::Player()
     player_shape.setOrigin(sf::Vector2f(player_size / 2.f, player_size / 2.f));
     
     // Error if can't load image
-    if (!player_texture.loadFromFile("Meatboy.png"))
+    if (!player_texture.loadFromFile("Sprites/Meatboy.png"))
     {
         throw "Error loading image";
     }

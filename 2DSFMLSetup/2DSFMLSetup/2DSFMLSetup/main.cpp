@@ -16,7 +16,7 @@ int main()
     window.setFramerateLimit(60);
 
     // Background settings
-    sf::Texture background_txt("background.jpg");
+    sf::Texture background_txt("Sprites/background.jpg");
     sf::RectangleShape background({ window_width, window_height });
     background.setTexture(&background_txt);
 
@@ -24,8 +24,11 @@ int main()
     // create the particle system
     ParticleSystem particles(1000);
 
-    // create a clock to track the elapsed time
-    sf::Clock clock;
+    // create a clock for particles
+    sf::Clock particle_clock;
+
+    // Create a clock for player time
+    sf::Clock stopwatch;
 
     // Player config
     Player player;
@@ -34,7 +37,7 @@ int main()
     float playerX_vel = 0.f;
 
     // Audio
-    Audio jump_sound("jump.mp3");
+    Audio jump_sound("Audio/jump.mp3");
 
     // Menu Buttons
     std::vector<Button> buttons;
@@ -84,9 +87,15 @@ int main()
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
         particles.setEmitter(window.mapPixelToCoords(mouse_pos));
 
-        // update it
-        sf::Time elapsed = clock.restart();
+        // update partciles using the mouse
+        sf::Time elapsed = particle_clock.restart();
         particles.update(elapsed);
+
+        // Update stopwatch
+        sf::Time elapsed2 = stopwatch.getElapsedTime();
+        int current_time = (elapsed2.asSeconds());
+        sf::Text ClockText(Font1, std::to_string(current_time), 32);
+        ClockText.setPosition({ 700.f, 100.f });
 
         // Only do these events if the user has the window selected
         while (const std::optional event = window.pollEvent())
@@ -130,6 +139,8 @@ int main()
                                 if (i == 0)
                                 {
                                     game_start = true;
+                                    stopwatch.restart();
+                                    std::cout << game_start;
                                 }
 
                                 // Credits
@@ -206,7 +217,7 @@ int main()
             for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
             {
                 // with Player
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
                     playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
@@ -215,13 +226,17 @@ int main()
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        std::cout << "\nPlayer: " << player.player_shape.getPosition().y;
-                        std::cout << "\nWall: " << MainLevel.level_wall_tiles[i]->getPosition().y;
-
-                        // Player can only jump off if they are on top of the block
-                        if (player.player_shape.getPosition().y < MainLevel.level_wall_tiles[i]->getPosition().y)
+                        // Player can only jump off if they are on top of the block when grvaity is true
+                        if (player.player_shape.getPosition().y < MainLevel.level_wall_tiles[i]->getPosition().y && gravity)
                         {
                             playerY_vel = -2.5f;
+                            jump_sound.Play();
+                        }
+
+                        // 
+                        if (player.player_shape.getPosition().y > MainLevel.level_wall_tiles[i]->getPosition().y && !gravity)
+                        {
+                            playerY_vel = 2.5f;
                             jump_sound.Play();
                         }
                     }
@@ -251,7 +266,8 @@ int main()
                         playerY_vel = -2.5f;
                     }
 
-                    if (playerY_vel < 0) { between_platform = true; }
+                    if (playerY_vel < 0 && gravity) { between_platform = true; }
+                    else if (playerY_vel > 0 && !gravity) { between_platform = true; }
 
                     // Down through platform
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
@@ -295,7 +311,7 @@ int main()
             // Drum
             for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
             {
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
 
@@ -308,9 +324,18 @@ int main()
             // Spikes
             for (int i = 0; i < MainLevel.level_spike_tiles.size(); i++)
             {
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_spike_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_spike_tiles[i]->getGlobalBounds()))
                 {
                     player.ResetPosition();
+                }
+            }
+
+            // Goal
+            for (int i = 0; i < MainLevel.level_goal_tile.size(); i++)
+            {
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_goal_tile[i]->getGlobalBounds()))
+                {
+                    game_start = false;
                 }
             }
 
@@ -322,7 +347,7 @@ int main()
             for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
             {
                 // Stop the player
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
                 }
@@ -341,7 +366,7 @@ int main()
             for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
             {
                 // Move the box
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
                 {
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
                     {
@@ -354,7 +379,7 @@ int main()
             for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
             {
                 // Stop the player
-                if (player.GetPlayerShape().getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
                 }
@@ -397,8 +422,17 @@ int main()
                 window.draw(*MainLevel.level_spike_tiles[i]);
             }
 
+            // Draw GOAL tile
+            for (int i = 0; i < MainLevel.level_goal_tile.size(); i++)
+            {
+                window.draw(*MainLevel.level_goal_tile[i]);
+            }
+
             // Draw player object
             window.draw(player.player_shape);
+
+            // Draw player's time
+            window.draw(ClockText);
         }
 
         else

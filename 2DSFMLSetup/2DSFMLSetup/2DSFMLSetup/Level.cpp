@@ -30,6 +30,7 @@ void Level::LoadLevel(std::string _file_path)
 	std::string load_file_string;
 	int line_count = 0;
 
+	// Load file to 2D Array
 	if (load_file_stream.is_open())
 	{
 		// collumns
@@ -101,7 +102,6 @@ void Level::LoadLevel(std::string _file_path)
 			}
 
 			// Spike
-			// Drum
 			if (level_array[x][y] == 's')
 			{
 				// Spawn a box at current location
@@ -110,6 +110,16 @@ void Level::LoadLevel(std::string _file_path)
 				NewBox->setFillColor(sf::Color::Red);// Spawn a box at current location
 
 				level_spike_tiles.push_back(NewBox);
+			}
+
+			if (level_array[x][y] == 'g')
+			{
+				// Spawn a box at current location
+				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
+				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
+				NewBox->setFillColor(sf::Color::Yellow);// Spawn a box at current location
+
+				level_goal_tile.push_back(NewBox);
 			}
 		}
 	}

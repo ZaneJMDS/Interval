@@ -17,6 +17,7 @@ public:
 	std::vector<sf::RectangleShape*> level_box_tiles; // Tiles the player can move
 	std::vector<sf::RectangleShape*> level_drum_tiles; // Tiles that cause the player to launch with a high velocity
 	std::vector<sf::RectangleShape*> level_spike_tiles; // Tiles that kill the player
+	std::vector<sf::RectangleShape*> level_goal_tile; // The tile the player needs to reach
 
 	char level_array[level_width][level_height];
 

@@ -21,8 +21,6 @@ public:
 	// Update player's position
 	float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt);
 
-	sf::RectangleShape GetPlayerShape() { return player_shape; }
-
 private:
 	const float player_size = 50.f;
 };
