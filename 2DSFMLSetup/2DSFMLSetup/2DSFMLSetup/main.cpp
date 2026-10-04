@@ -107,7 +107,7 @@ int main()
         ClockText.setPosition({ 700.f, 100.f });
 
         // Check the player hasn't left the map
-        if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().y > window_height) { player.ResetPosition(); }
+        if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().y > window_height) { player.ResetPosition(Levels[current_level]); }
 
         // Only do these events if the user has the window selected
         while (const std::optional event = window.pollEvent())
@@ -193,7 +193,7 @@ int main()
             // Reset player
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
             {
-                player.ResetPosition();
+                player.ResetPosition(Levels[current_level]);
             }
 
             // HORIZONTAL MOVEMENT
@@ -270,9 +270,10 @@ int main()
                     }
                 }
 
-                // with Box
+                // with BOX
                 for (int j = 0; j < Levels[current_level].level_box_tiles.size(); j++)
                 {
+                    // Move the BOX
                     if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
                         Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
@@ -294,6 +295,7 @@ int main()
                         playerY_vel = -3.f;
                     }
 
+                    // Check if player is currently below platform
                     if (playerY_vel < 0 && gravity) { between_platform = true; }
                     else if (playerY_vel > 0 && !gravity) { between_platform = true; }
 
@@ -354,7 +356,7 @@ int main()
             {
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_spike_tiles[i]->getGlobalBounds()))
                 {
-                    player.ResetPosition();
+                    player.ResetPosition(Levels[current_level]);
                 }
             }
 
@@ -370,7 +372,7 @@ int main()
                     {
                         current_level++;
                         Levels[current_level].LoadLevel();
-                        player.ResetPosition();
+                        player.ResetPosition(Levels[current_level]);
                         stopwatch.restart();
                     }
 

@@ -99,13 +99,17 @@ void Level::LoadLevel()
 				// Spawn a box at current location
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
-				
+
 				// Location and size of texture
 				NewBox->setTextureRect(sf::IntRect({ 112, 48 }, { 16, 16 }));
 				NewBox->setTexture(&world_texture);
 
 				// Collider logic
 				level_box_tiles.push_back(NewBox);
+
+				// Remember starting position with box class 
+				Box boxlogic(NewBox);
+				level_boxes.push_back(boxlogic);
 			}
 
 			// Drum
@@ -150,8 +154,8 @@ void Level::LoadLevel()
 	// Push all tiles to level tiles
 	level_tiles.push_back(level_wall_tiles);
 	level_tiles.push_back(level_platform_tiles);
-	level_tiles.push_back(level_box_tiles);
 	level_tiles.push_back(level_drum_tiles);
+	level_tiles.push_back(level_box_tiles);
 	level_tiles.push_back(level_spike_tiles);
 	level_tiles.push_back(level_goal_tile);
 }
@@ -164,11 +168,13 @@ void Level::UnloadLevel()
 		// Clears specific types of tile
 		for (int j = 0; j < level_tiles[i].size(); j++)
 		{
-			// Delete all boxes that were placed
+			// Delete all tiles that were placed
 			delete level_tiles[i][j];
 		}
 		level_tiles[i].clear();
 	}
 
 	level_tiles.clear();
+
+	level_boxes.clear();
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include "box.h"
+
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include <iostream>
@@ -18,6 +20,9 @@ public:
 	std::vector<sf::RectangleShape*> level_spike_tiles; // Tiles that kill the player
 	std::vector<sf::RectangleShape*> level_goal_tile; // The tile the player needs to reach
 	
+	// Boxes
+	std::vector<Box> level_boxes; // A class to hold the location of each box
+
 	// Textures for said tiles
 	sf::Texture world_texture;
 	sf::Texture platform_texture;

@@ -20,6 +20,17 @@ Player::~Player()
 {
 }
 
+void Player::ResetPosition(Level _current_level)
+{
+    player_shape.setPosition({ 200.f, 450.f });
+
+    for (int i = 0; i < _current_level.level_boxes.size(); i++)
+    {
+        std::cout << i << "\n";
+        _current_level.level_boxes[i].ResetPosition(_current_level.level_box_tiles[i]);
+    }
+}
+
 void Player::Jump(float _playerY_vel)
 {
     player_shape.move({ 0.f, _playerY_vel });
