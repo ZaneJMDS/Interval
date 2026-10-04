@@ -5,7 +5,7 @@
 class ParticleSystem : public sf::Drawable, public sf::Transformable
 {
 public:
-    ParticleSystem(unsigned int count) : m_particles(count), m_vertices(sf::PrimitiveType::Points, count)
+    ParticleSystem(unsigned int count, sf::Color color) : m_particles(count), m_vertices(sf::PrimitiveType::Points, count), m_color(color)
     {
     }
 
@@ -31,6 +31,7 @@ public:
 
             // update the alpha (transparency) of the particle according to its lifetime
             float ratio = p.lifetime.asSeconds() / m_lifetime.asSeconds();
+            m_vertices[i].color = m_color;
             m_vertices[i].color.a = static_cast<std::uint8_t>(ratio * 255);
         }
     }
@@ -75,5 +76,6 @@ private:
     sf::VertexArray       m_vertices;
     sf::Time              m_lifetime{ sf::seconds(3) };
     sf::Vector2f          m_emitter;
+    sf::Color             m_color;
 };
 

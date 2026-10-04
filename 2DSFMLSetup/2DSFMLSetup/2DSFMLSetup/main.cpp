@@ -22,7 +22,7 @@ int main()
 
     // Particle config
     // create the particle system
-    ParticleSystem particles(1000);
+    ParticleSystem particles(1000, sf::Color::Red);
 
     // create a clock for particles
     sf::Clock particle_clock;
@@ -73,8 +73,17 @@ int main()
         button_roles[i].setFillColor(sf::Color::Black);
     }
 
-    // Load the first level
-    Level MainLevel(15, 10);
+    // Load all levels
+    const int levels = 3;
+
+    Level MainLevel("Levels/Level1.txt");
+    Level SecondLevel("Levels/Level2.txt");
+    Level ThirdLevel("Levels/Level3.txt");
+
+    int current_level = 0;
+    MainLevel.LoadLevel();
+
+    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel };
 
     bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
@@ -85,7 +94,7 @@ int main()
     {
         // make the particle system emitter follow the mouse
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
-        particles.setEmitter(window.mapPixelToCoords(mouse_pos));
+        // particles.setEmitter(window.mapPixelToCoords(mouse_pos));
 
         // update partciles using the mouse
         sf::Time elapsed = particle_clock.restart();
@@ -96,6 +105,9 @@ int main()
         int current_time = (elapsed2.asSeconds());
         sf::Text ClockText(Font1, std::to_string(current_time), 32);
         ClockText.setPosition({ 700.f, 100.f });
+
+        // Check the player hasn't left the map
+        if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().y > window_height) { player.ResetPosition(); }
 
         // Only do these events if the user has the window selected
         while (const std::optional event = window.pollEvent())
@@ -140,7 +152,6 @@ int main()
                                 {
                                     game_start = true;
                                     stopwatch.restart();
-                                    std::cout << game_start;
                                 }
 
                                 // Credits
@@ -178,8 +189,6 @@ int main()
         // In game events
         if (game_start)
         {
-            playerX_vel = 0.f; // Reset player's X velocity if they stop moving left and right
-
             // KEYBINDS
             // Reset player
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
@@ -190,12 +199,31 @@ int main()
             // HORIZONTAL MOVEMENT
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
             {
-                playerX_vel = -5.f;
+                if (playerX_vel > -5.f)
+                {
+                    playerX_vel -= 0.1f;
+                }
+
+                else { particles.setEmitter(player.player_shape.getPosition()); }
+
             }
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
             {
-                playerX_vel = 5.f;
+                if (playerX_vel < 5.f)
+                {
+                    playerX_vel += 0.1f;
+                }
+                
+                else { particles.setEmitter(player.player_shape.getPosition()); }
+            }
+
+            // Reset player's X velocity if they stop moving left and right
+            else
+            {
+                if (playerX_vel < 0.2f && playerX_vel > -0.2f) { playerX_vel = 0.f; }
+                if (playerX_vel > 0.f) { playerX_vel -= 0.2f;}
+                if (playerX_vel < 0.f) { playerX_vel += 0.2f;}
             }
 
             // Normal gravity
@@ -214,12 +242,12 @@ int main()
 
             // COLLISION PROCESSING - Y
             // Walls
-            for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_wall_tiles.size(); i++)
             {
                 // with Player
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
+                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i], false);
                     playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
 
                     // VERTICAL MOVEMENT
@@ -227,27 +255,27 @@ int main()
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
                         // Player can only jump off if they are on top of the block when grvaity is true
-                        if (player.player_shape.getPosition().y < MainLevel.level_wall_tiles[i]->getPosition().y && gravity)
+                        if (player.player_shape.getPosition().y < Levels[current_level].level_wall_tiles[i]->getPosition().y && gravity)
                         {
-                            playerY_vel = -2.5f;
+                            playerY_vel = -3.f;
                             jump_sound.Play();
                         }
 
                         // 
-                        if (player.player_shape.getPosition().y > MainLevel.level_wall_tiles[i]->getPosition().y && !gravity)
+                        if (player.player_shape.getPosition().y > Levels[current_level].level_wall_tiles[i]->getPosition().y && !gravity)
                         {
-                            playerY_vel = 2.5f;
+                            playerY_vel = 3.f;
                             jump_sound.Play();
                         }
                     }
                 }
 
                 // with Box
-                for (int j = 0; j < MainLevel.level_box_tiles.size(); j++)
+                for (int j = 0; j < Levels[current_level].level_box_tiles.size(); j++)
                 {
-                    if (MainLevel.level_box_tiles[j]->getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                    if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
-                        Collisions::ResolveYCollisions(MainLevel.level_box_tiles[j], MainLevel.level_wall_tiles[i], false);
+                        Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
                     }
                 }
             }
@@ -255,15 +283,15 @@ int main()
             int j = 0; // Counter to see if the player isn't colliding with any platform
 
             // Platforms
-            for (int i = 0; i < MainLevel.level_platform_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_platform_tiles.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_platform_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_platform_tiles[i]->getGlobalBounds()))
                 {
                     // VERTICAL MOVEMENT
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        playerY_vel = -2.5f;
+                        playerY_vel = -3.f;
                     }
 
                     if (playerY_vel < 0 && gravity) { between_platform = true; }
@@ -272,7 +300,7 @@ int main()
                     // Down through platform
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
                     {
-                        playerY_vel = 2.5f;
+                        playerY_vel = 3.f;
                         between_platform = true;
                     }
 
@@ -280,25 +308,25 @@ int main()
                     if (!between_platform)
                     {
                         playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
-                        Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_platform_tiles[i], false);
+                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_platform_tiles[i], false);
                     }
                 }
 
                 // If player stops coliding with the platform set 
-                if (!player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_platform_tiles[i]->getGlobalBounds()))
+                if (!player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_platform_tiles[i]->getGlobalBounds()))
                 {
                     j++;
-                    if (j == MainLevel.level_platform_tiles.size()) { between_platform = false; }
+                    if (j == Levels[current_level].level_platform_tiles.size()) { between_platform = false; }
                 }
             }
 
             // Boxes
-            for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
                 {
                     // Swap the collisions around to move the box instead of the player
-                    Collisions::ResolveYCollisions(MainLevel.level_box_tiles[i], &player.player_shape, false);
+                    Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
                 }
             }
 
@@ -309,11 +337,11 @@ int main()
             }
 
             // Drum
-            for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_drum_tiles.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveYCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
+                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
 
                     // VERTICAL MOVEMENT
                     playerY_vel = -5.0f;
@@ -322,20 +350,35 @@ int main()
             }
 
             // Spikes
-            for (int i = 0; i < MainLevel.level_spike_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_spike_tiles.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_spike_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_spike_tiles[i]->getGlobalBounds()))
                 {
                     player.ResetPosition();
                 }
             }
 
             // Goal
-            for (int i = 0; i < MainLevel.level_goal_tile.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_goal_tile.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_goal_tile[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_goal_tile[i]->getGlobalBounds()))
                 {
-                    game_start = false;
+                    Levels[current_level].UnloadLevel();
+                    
+                    // If there are still remaining levels
+                    if (current_level < levels)
+                    {
+                        current_level++;
+                        Levels[current_level].LoadLevel();
+                        player.ResetPosition();
+                        stopwatch.restart();
+                    }
+
+                    // This was the last level
+                    else
+                    {
+                        game_start = false;
+                    }
                 }
             }
 
@@ -344,44 +387,44 @@ int main()
 
             // COLLISION PROCESSING - X
             // Player collides with WALL
-            for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_wall_tiles.size(); i++)
             {
                 // Stop the player
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_wall_tiles[i], false);
+                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i], false);
                 }
 
                 // with Box
-                for (int j = 0; j < MainLevel.level_box_tiles.size(); j++)
+                for (int j = 0; j < Levels[current_level].level_box_tiles.size(); j++)
                 {
-                    if (MainLevel.level_box_tiles[j]->getGlobalBounds().findIntersection(MainLevel.level_wall_tiles[i]->getGlobalBounds()))
+                    if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
-                        Collisions::ResolveXCollisions(MainLevel.level_box_tiles[j], MainLevel.level_wall_tiles[i], false);
+                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
                     }
                 }
             }
 
             // Player collides with BOX
-            for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
             {
                 // Move the box
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_box_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
                 {
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
                     {
-                        Collisions::ResolveXCollisions(MainLevel.level_box_tiles[i], &player.player_shape, false);
+                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
                     }
                 }
             }
 
             // Player collides with DRUM
-            for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_drum_tiles.size(); i++)
             {
                 // Stop the player
-                if (player.player_shape.getGlobalBounds().findIntersection(MainLevel.level_drum_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveXCollisions(&player.player_shape, MainLevel.level_drum_tiles[i], false);
+                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
                 }
             }
         }
@@ -392,40 +435,14 @@ int main()
 
         if (game_start)
         {
-            // Draw all WALL tiles
-            for (int i = 0; i < MainLevel.level_wall_tiles.size(); i++)
+            // Draw all level tiles
+            for (int i = 0; i < Levels[current_level].level_tiles.size(); i++)
             {
-                window.draw(*MainLevel.level_wall_tiles[i]);
-            }
-
-            // Draw all PLATFORM tiles
-            for (int i = 0; i < MainLevel.level_platform_tiles.size(); i++)
-            {
-                window.draw(*MainLevel.level_platform_tiles[i]);
-            }
-
-            // Draw all BOX tiles
-            for (int i = 0; i < MainLevel.level_box_tiles.size(); i++)
-            {
-                window.draw(*MainLevel.level_box_tiles[i]);
-            }
-
-            // Draw all DRUM tiles
-            for (int i = 0; i < MainLevel.level_drum_tiles.size(); i++)
-            {
-                window.draw(*MainLevel.level_drum_tiles[i]);
-            }
-
-            // Draw all SPIKE tiles
-            for (int i = 0; i < MainLevel.level_spike_tiles.size(); i++)
-            {
-                window.draw(*MainLevel.level_spike_tiles[i]);
-            }
-
-            // Draw GOAL tile
-            for (int i = 0; i < MainLevel.level_goal_tile.size(); i++)
-            {
-                window.draw(*MainLevel.level_goal_tile[i]);
+                // Draw all specific tile type
+                for (int j = 0; j < Levels[current_level].level_tiles[i].size(); j++)
+                {
+                    window.draw(*Levels[current_level].level_tiles[i][j]);
+                }
             }
 
             // Draw player object
