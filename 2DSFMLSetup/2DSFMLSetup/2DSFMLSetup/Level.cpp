@@ -18,6 +18,12 @@ Level::Level(std::string _filepath, terrain_types _terrain_type) : filepath(_fil
 	{
 		throw "Error loading image";
 	}
+
+	// Error if can't load image
+	if (!goal_texture.loadFromFile("Sprites/fruit.png"))
+	{
+		throw "Error loading image";
+	}
 }
 
 Level::~Level()
@@ -216,7 +222,37 @@ void Level::LoadLevel()
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 				
-				NewBox->setFillColor(sf::Color::Yellow);// Spawn a box at current location
+				switch (terrain_type)
+				{
+				case Forest:
+				{
+					NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 16 }));
+				}
+
+				break;
+
+				case Mountain:
+				{
+					NewBox->setTextureRect(sf::IntRect({ 0, 16 }, { 16, 16 }));
+				}
+
+				break;
+
+				case Desert:
+				{
+					NewBox->setTextureRect(sf::IntRect({ 0, 32 }, { 16, 16 }));
+				}
+
+				break;
+
+				case Snowy:
+				{
+					NewBox->setTextureRect(sf::IntRect({ 0, 48 }, { 16, 16 }));
+				}
+				break;
+				}
+
+				NewBox->setTexture(&goal_texture);
 
 				level_goal_tile.push_back(NewBox);
 			}

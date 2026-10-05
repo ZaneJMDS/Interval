@@ -84,7 +84,6 @@ int main()
     Level FourthLevel("Levels/Level4.txt", Snowy);
 
     int current_level = 0;
-    MainLevel.LoadLevel();
 
     Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel };
 
@@ -117,11 +116,11 @@ int main()
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
         // particles.setEmitter(window.mapPixelToCoords(mouse_pos));
 
-        // update partciles using the mouse
+        // update particles using the mouse
         sf::Time elapsed = particle_clock.restart();
         particles.update(elapsed);
 
-        // Update stopwatch
+        // Update stopwatch and display to screen
         sf::Time elapsed2 = stopwatch.getElapsedTime();
         int current_time = (elapsed2.asSeconds());
         sf::Text ClockText(Font1, "TIME: " + std::to_string(current_time), 32);
@@ -159,6 +158,36 @@ int main()
                 {
                     Levels[current_level].Reset(&player);
                 }
+
+                // Music volume controls
+                if (keyPressed->code == sf::Keyboard::Key::O)
+                {
+                    menu_music.DecreaseVolume();
+                }
+
+                if (keyPressed->code == sf::Keyboard::Key::P)
+                {
+                    menu_music.IncreaseVolume();
+                }
+
+                // Dev Debug Level switcher
+                for (int i = 0; i < levels; i++)
+                {
+                    // Dont unload the level if it is current one 
+                    if (i != current_level)
+                    {
+                        // Ascii values for number keys
+                        if (keyPressed->code == sf::Keyboard::Key(i + 27))
+                        {
+                            Levels[current_level].UnloadLevel(current_time);
+                            current_level = i;
+
+                            Levels[current_level].LoadLevel();
+                            Levels[current_level].Reset(&player);
+                            stopwatch.restart();
+                        }
+                    }
+                }
             }
 
             // Interactable menu if the game hasn't started
@@ -180,6 +209,7 @@ int main()
                                 {
                                     game_start = true;
                                     stopwatch.restart();
+                                    Levels[0].LoadLevel();
                                 }
 
                                 // Credits
@@ -390,10 +420,10 @@ int main()
             {
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_goal_tile[i]->getGlobalBounds()))
                 {
-                    Levels[current_level].UnloadLevel();
+                    Levels[current_level].UnloadLevel(current_time);
                     
                     // If there are still remaining levels
-                    if (current_level < levels)
+                    if (current_level < levels - 1)
                     {
                         current_level++;
                         Levels[current_level].LoadLevel();
@@ -404,6 +434,11 @@ int main()
                     // This was the last level
                     else
                     {
+                        // Display scores to the user
+                        for (int i = 0; i < levels; i++)
+                        {
+                            std::cout << "Level " << i + 1 << ": " << Levels[i].GetTime();
+                        }
                         game_start = false;
                     }
                 }
