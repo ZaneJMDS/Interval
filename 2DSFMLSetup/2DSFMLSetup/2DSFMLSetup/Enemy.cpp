@@ -52,7 +52,7 @@ void Enemy::Rotate()
 
 void Enemy::Move()
 {
-    if (enemy_shape.getScale() == sf::Vector2f{ -1.f, 1.f }) { enemy_shape.move({-2.f, 0.f}); } // Move left
-    else { enemy_shape.move({2.f, 0.f}); } // Move right
+    if (enemy_shape.getScale() == sf::Vector2f{ -1.f, 1.f }) { enemy_shape.move({-1.f, 0.f}); } // Move left
+    else { enemy_shape.move({1.f, 0.f}); } // Move right
 }
 

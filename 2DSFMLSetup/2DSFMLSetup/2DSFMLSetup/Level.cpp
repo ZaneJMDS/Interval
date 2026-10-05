@@ -1,6 +1,6 @@
 #include "Level.h"
 
-Level::Level(std::string _filepath) : filepath(_filepath)
+Level::Level(std::string _filepath, terrain_types _terrain_type) : filepath(_filepath), terrain_type(_terrain_type)
 {
 	// Error if can't load image
 	if (!world_texture.loadFromFile("Sprites/world_tileset.png"))
@@ -64,14 +64,60 @@ void Level::LoadLevel()
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 
-				// Location and size of texture
-				if (y != 0 && level_array[x][y - 1] == 'x')
+				switch (terrain_type)
 				{
+				case Forest:
+
 					// Location and size of texture
-					NewBox->setTextureRect(sf::IntRect({ 0, 16 }, { 16, 16 })); // Dirt
+					if (y != 0 && level_array[x][y - 1] == 'x')
+					{
+						// Location and size of texture
+						NewBox->setTextureRect(sf::IntRect({ 0, 16 }, { 16, 16 })); // Dirt
+					}
+
+					else { NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 16 })); } // Grass
+
+					break;
+
+				case Mountain:
+
+					// Location and size of texture
+					if (y != 0 && level_array[x][y - 1] == 'x')
+					{
+						// Location and size of texture
+						NewBox->setTextureRect(sf::IntRect({ 32, 16 }, { 16, 16 })); // Dirt
+					}
+
+					else { NewBox->setTextureRect(sf::IntRect({ 32, 0 }, { 16, 16 })); } // Grass
+
+					break;
+
+				case Desert:
+
+					// Location and size of texture
+					if (y != 0 && level_array[x][y - 1] == 'x')
+					{
+						// Location and size of texture
+						NewBox->setTextureRect(sf::IntRect({ 64, 16 }, { 16, 16 })); // Dirt
+					}
+
+					else { NewBox->setTextureRect(sf::IntRect({ 64, 0 }, { 16, 16 })); } // Grass
+
+					break;
+
+				case Snowy:
+
+					// Location and size of texture
+					if (y != 0 && level_array[x][y - 1] == 'x')
+					{
+						// Location and size of texture
+						NewBox->setTextureRect(sf::IntRect({ 96, 16 }, { 16, 16 })); // Dirt
+					}
+
+					else { NewBox->setTextureRect(sf::IntRect({ 96, 0 }, { 16, 16 })); } // Grass
+
+					break;
 				}
-				
-				else { NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 16 })); } // Grass
 				
 				NewBox->setTexture(&world_texture);
 
@@ -86,8 +132,33 @@ void Level::LoadLevel()
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 32 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 
-				// Location and size of texture
-				NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 9 }));
+				switch (terrain_type)
+				{
+				case Forest:
+					// Location and size of texture
+					NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 9 }));
+
+					break;
+
+				case Mountain:
+					// Location and size of texture
+					NewBox->setTextureRect(sf::IntRect({ 0, 16 }, { 16, 9 }));
+
+					break;
+
+				case Desert:
+					// Location and size of texture
+					NewBox->setTextureRect(sf::IntRect({ 0, 32 }, { 16, 9 }));
+
+					break;
+
+				case Snowy:
+					// Location and size of texture
+					NewBox->setTextureRect(sf::IntRect({ 0, 48 }, { 16, 9 }));
+
+					break;
+				}
+				
 				NewBox->setTexture(&platform_texture);
 
 				// Collider logic
@@ -170,8 +241,10 @@ void Level::LoadLevel()
 	level_tiles.push_back(level_goal_tile);
 }
 
-void Level::UnloadLevel()
+void Level::UnloadLevel(int _final_time)
 {
+	final_time = _final_time;
+
 	// Clear out all the current tiles in the level
 	for (int i = 0; i < level_tiles.size(); i++)
 	{

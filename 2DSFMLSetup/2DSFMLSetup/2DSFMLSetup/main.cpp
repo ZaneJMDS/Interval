@@ -17,7 +17,7 @@ int main()
     window.setFramerateLimit(60);
 
     // Background settings
-    sf::Texture background_txt("Sprites/background.jpg");
+    sf::Texture background_txt("Sprites/background.png");
     sf::RectangleShape background({ window_width, window_height });
     background.setTexture(&background_txt);
 
@@ -39,6 +39,7 @@ int main()
 
     // Audio
     Audio jump_sound("Audio/jump.mp3");
+    Audio menu_music("Audio/menu.mp3");
 
     // Menu Buttons
     std::vector<Button> buttons;
@@ -75,20 +76,23 @@ int main()
     }
 
     // Load all levels
-    const int levels = 3;
+    const int levels = 4;
 
-    Level MainLevel("Levels/Level1.txt");
-    Level SecondLevel("Levels/Level2.txt");
-    Level ThirdLevel("Levels/Level3.txt");
+    Level MainLevel("Levels/Level1.txt", Forest);
+    Level SecondLevel("Levels/Level2.txt", Desert);
+    Level ThirdLevel("Levels/Level3.txt", Mountain);
+    Level FourthLevel("Levels/Level4.txt", Snowy);
 
     int current_level = 0;
     MainLevel.LoadLevel();
 
-    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel };
+    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel };
 
     bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
     bool game_start = false; // If the player is in the main menu or not
+
+    menu_music.Play();
 
     // While the game is running
     while (window.isOpen())
@@ -120,8 +124,8 @@ int main()
         // Update stopwatch
         sf::Time elapsed2 = stopwatch.getElapsedTime();
         int current_time = (elapsed2.asSeconds());
-        sf::Text ClockText(Font1, std::to_string(current_time), 32);
-        ClockText.setPosition({ 700.f, 100.f });
+        sf::Text ClockText(Font1, "TIME: " + std::to_string(current_time), 32);
+        ClockText.setPosition({ 150.f, 650.f });
 
         // Check the player hasn't left the map
         if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().x < 0 || player.player_shape.getPosition().y > window_height || player.player_shape.getPosition().y < 0) { player.ResetPosition(); }
@@ -213,6 +217,8 @@ int main()
         // In game events
         if (game_start)
         {
+            // menu_music.sound.stop();
+
             // HORIZONTAL MOVEMENT
             // Left
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
@@ -277,14 +283,14 @@ int main()
                         if (player.player_shape.getPosition().y < Levels[current_level].level_wall_tiles[i]->getPosition().y && gravity)
                         {
                             playerY_vel = -3.f;
-                            jump_sound.Play();
+                            jump_sound.GetSound().play();
                         }
 
                         // 
                         if (player.player_shape.getPosition().y > Levels[current_level].level_wall_tiles[i]->getPosition().y && !gravity)
                         {
                             playerY_vel = 3.f;
-                            jump_sound.Play();
+                            jump_sound.GetSound().play();
                         }
                     }
                 }
@@ -366,7 +372,7 @@ int main()
 
                     // VERTICAL MOVEMENT
                     playerY_vel = -5.0f;
-                    jump_sound.Play();
+                    jump_sound.GetSound().play();
                 }
             }
 
@@ -462,10 +468,10 @@ int main()
 
         window.clear();
 
-        window.draw(background);
-
         if (game_start)
         {
+            window.draw(background);
+
             // Draw all level tiles
             for (int i = 0; i < Levels[current_level].level_tiles.size(); i++)
             {

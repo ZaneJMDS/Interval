@@ -7,17 +7,17 @@
 #include <fstream>
 #include <iostream>
 
+enum terrain_types
+{
+	Forest,
+	Desert,
+	Mountain,
+	Snowy
+};
+
 class Level
 {
 public:
-	enum terrain_types
-	{
-		Forest,
-		Desert,
-		Clay,
-		Snowy
-	};
-
 
 	// Level dimensions
 	static const int level_width = 20;
@@ -52,14 +52,16 @@ public:
 
 	char level_array[level_width][level_height];
 
-	Level(std::string _filepath);
+	Level(std::string _filepath, terrain_types _terrain_type);
 	~Level();
 
 	void LoadLevel();
-	void UnloadLevel();
+	void UnloadLevel(int _final_time);
 	void Reset(Player* _player);
+	int GetTime() { return final_time; }
 
 private:
+	int final_time;
 	std::string filepath;
 	terrain_types terrain_type;
 };

@@ -8,8 +8,8 @@ public:
 	Audio(std::string _src);
 	~Audio();
 
+	sf::Sound GetSound() { return sound; }
 	void Play() { sound.play(); }
-	void Stop() { sound.stop(); }
 
 private:
 	sf::SoundBuffer buffer;
