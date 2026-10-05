@@ -20,15 +20,11 @@ Player::~Player()
 {
 }
 
-void Player::ResetPosition(Level _current_level)
+// Reset the world, this includes the player, boxes, and enemies
+void Player::ResetPosition()
 {
+    // Reset the player
     player_shape.setPosition({ 200.f, 450.f });
-
-    for (int i = 0; i < _current_level.level_boxes.size(); i++)
-    {
-        std::cout << i << "\n";
-        _current_level.level_boxes[i].ResetPosition(_current_level.level_box_tiles[i]);
-    }
 }
 
 void Player::Jump(float _playerY_vel)

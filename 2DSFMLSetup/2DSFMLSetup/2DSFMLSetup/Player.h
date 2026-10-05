@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-#include "Level.h"
 
 class Player
 {
@@ -14,7 +13,7 @@ public:
 	~Player();
 
 	void Rotate() { player_shape.rotate(sf::degrees(180)); }
-	void ResetPosition(Level _current_level);
+	void ResetPosition();
 	void Gravity(float _playerY_vel) { player_shape.move({ 0.f, _playerY_vel }); }
 	void Jump(float _playerY_vel);
 	void Move(float _playerX_vel) { player_shape.move({ _playerX_vel, 0.f }); }

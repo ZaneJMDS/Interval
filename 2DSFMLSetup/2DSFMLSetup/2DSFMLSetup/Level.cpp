@@ -2,19 +2,6 @@
 
 Level::Level(std::string _filepath) : filepath(_filepath)
 {
-	for (int i = 0; i < level_width; i++)
-	{
-		for (int j = 0; j < level_height; j++)
-		{
-			// TODO Draw a wall
-			if (i == 0 || j == 0)
-			{
-
-			}
-		}
-	}
-
-
 	// Error if can't load image
 	if (!world_texture.loadFromFile("Sprites/world_tileset.png"))
 	{
@@ -22,6 +9,12 @@ Level::Level(std::string _filepath) : filepath(_filepath)
 	}
 
 	if (!platform_texture.loadFromFile("Sprites/platforms.png"))
+	{
+		throw "Error loading image";
+	}
+
+	// Error if can't load image
+	if (!enemy_texture.loadFromFile("Sprites/slime_green.png"))
 	{
 		throw "Error loading image";
 	}
@@ -63,6 +56,7 @@ void Level::LoadLevel()
 		// rows
 		for (int x = 0; x < level_width; x++)
 		{
+			// TILES
 			// Wall
 			if (level_array[x][y] == 'x')
 			{
@@ -71,7 +65,14 @@ void Level::LoadLevel()
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 
 				// Location and size of texture
-				NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 16 }));
+				if (y != 0 && level_array[x][y - 1] == 'x')
+				{
+					// Location and size of texture
+					NewBox->setTextureRect(sf::IntRect({ 0, 16 }, { 16, 16 })); // Dirt
+				}
+				
+				else { NewBox->setTextureRect(sf::IntRect({ 0, 0 }, { 16, 16 })); } // Grass
+				
 				NewBox->setTexture(&world_texture);
 
 				// Collider logic
@@ -148,6 +149,15 @@ void Level::LoadLevel()
 
 				level_goal_tile.push_back(NewBox);
 			}
+
+			// ENEMIES
+			if (level_array[x][y] == 'e')
+			{
+				sf::Vector2f start_pos(x * 64, y * 64);
+				Enemy NewEnemy(start_pos, enemy_texture);
+
+				level_enemies.push_back(NewEnemy);
+			}
 		}
 	}
 
@@ -176,5 +186,26 @@ void Level::UnloadLevel()
 
 	level_tiles.clear();
 
+	// Clear boxes as well
 	level_boxes.clear();
+
+	// Clear enemies as well
+	level_enemies.clear();
+}
+
+void Level::Reset(Player* _player)
+{
+	_player->ResetPosition();
+
+	// Reset all the boxes
+	for (int i = 0; i < level_boxes.size(); i++)
+	{
+		level_boxes[i].ResetPosition(level_box_tiles[i]);
+	}
+
+	// Reset all the enemies
+	for (int i = 0; i < level_enemies.size(); i++)
+	{
+		level_enemies[i].Reset();
+	}
 }
