@@ -1,3 +1,10 @@
+/***********************************************************************
+Author      :	Zane Jackson
+Mail        :   Zane.Jackson@mds.ac.nz
+Description :	Class for managing the player object
+File name   :   Player.h
+**************************************************************************/
+
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -18,7 +25,7 @@ public:
 	void Jump(float _playerY_vel);
 	void Move(float _playerX_vel) { player_shape.move({ _playerX_vel, 0.f }); }
 
-	// Update player's position
+	// Update player's position relative to gravity
 	float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt);
 
 private:

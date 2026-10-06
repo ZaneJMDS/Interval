@@ -2,7 +2,7 @@
 
 Level::Level(std::string _filepath, terrain_types _terrain_type) : filepath(_filepath), terrain_type(_terrain_type)
 {
-	// Error if can't load image
+	// load Textures and fonts here
 	if (!world_texture.loadFromFile("Sprites/world_tileset.png"))
 	{
 		throw "Error loading image";
@@ -13,16 +13,19 @@ Level::Level(std::string _filepath, terrain_types _terrain_type) : filepath(_fil
 		throw "Error loading image";
 	}
 
-	// Error if can't load image
 	if (!enemy_texture.loadFromFile("Sprites/slime_green.png"))
 	{
 		throw "Error loading image";
 	}
 
-	// Error if can't load image
 	if (!goal_texture.loadFromFile("Sprites/fruit.png"))
 	{
 		throw "Error loading image";
+	}
+
+	if (!Font1.openFromFile("PressStart2P-Regular.ttf"))
+	{
+		throw "Font could not be loaded";
 	}
 }
 
@@ -277,9 +280,9 @@ void Level::LoadLevel()
 	level_tiles.push_back(level_goal_tile);
 }
 
-void Level::UnloadLevel(int _final_time)
+void Level::UnloadLevel()
 {
-	final_time = _final_time;
+	final_time = current_time;
 
 	// Clear out all the current tiles in the level
 	for (int i = 0; i < level_tiles.size(); i++)
@@ -288,7 +291,7 @@ void Level::UnloadLevel(int _final_time)
 		for (int j = 0; j < level_tiles[i].size(); j++)
 		{
 			// Delete all tiles that were placed
-			delete level_tiles[i][j];
+			// delete level_tiles[i][j];
 		}
 		level_tiles[i].clear();
 	}
@@ -317,4 +320,18 @@ void Level::Reset(Player* _player)
 	{
 		level_enemies[i].Reset();
 	}
+
+	// Restart player's time for this room
+	stopwatch.restart();
+}
+
+sf::Text Level::StopwatchUpdate()
+{
+	// Update stopwatch and display to screen
+	sf::Time elapsed2 = stopwatch.getElapsedTime();
+	current_time = (elapsed2.asSeconds());
+	sf::Text ClockText(Font1, "TIME: " + std::to_string(current_time), 32);
+	ClockText.setPosition({ 150.f, 650.f });
+
+	return ClockText;
 }

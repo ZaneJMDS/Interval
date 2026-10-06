@@ -1,3 +1,10 @@
+/***********************************************************************
+Author      :	Zane Jackson
+Mail        :   Zane.Jackson@mds.ac.nz
+Description :	Class for slime enemy
+File name   :   Enemy.h
+**************************************************************************/
+
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>

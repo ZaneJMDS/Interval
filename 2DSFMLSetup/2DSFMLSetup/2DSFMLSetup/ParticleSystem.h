@@ -1,3 +1,9 @@
+/***********************************************************************
+Author      :	SFML
+Description :	Class for adding particles
+File name   :   ParticleSystem.h
+**************************************************************************/
+
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <random>

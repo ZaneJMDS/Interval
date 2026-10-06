@@ -11,7 +11,7 @@ Audio::Audio(std::string _src) : sound(buffer)
 	}
 
 	sound.setBuffer(buffer);
-	sound.setVolume(50.f);
+	sound.setVolume(25.f);
 }
 
 Audio::~Audio()

@@ -1,3 +1,10 @@
+/***********************************************************************
+Author      :	Zane Jackson
+Mail        :   Zane.Jackson@mds.ac.nz
+Description :	Class for managing, loading, and unloading levels
+File name   :   Level.h
+**************************************************************************/
+
 #pragma once
 #include "box.h"
 #include "enemy.h"
@@ -18,7 +25,6 @@ enum terrain_types
 class Level
 {
 public:
-
 	// Level dimensions
 	static const int level_width = 20;
 	static const int level_height = 10;
@@ -45,22 +51,28 @@ public:
 	sf::Texture spike_texture;
 	sf::Texture goal_texture;
 
-	// text
+	// Texture
 	sf::Texture enemy_texture;
+
+	// Create a clock for player time
+	sf::Clock stopwatch;
 
 	std::vector<std::vector<sf::RectangleShape*>> level_tiles; // Remember to add new tiles to LoadLevel
 
-	char level_array[level_width][level_height];
+	char level_array[level_width][level_height]; // Array holding level tiles
 
 	Level(std::string _filepath, terrain_types _terrain_type);
 	~Level();
 
 	void LoadLevel();
-	void UnloadLevel(int _final_time);
+	void UnloadLevel();
 	void Reset(Player* _player);
 	int GetTime() { return final_time; }
+	sf::Text StopwatchUpdate();
 
 private:
+	sf::Font Font1;
+	int current_time;
 	int final_time;
 	std::string filepath;
 	terrain_types terrain_type;

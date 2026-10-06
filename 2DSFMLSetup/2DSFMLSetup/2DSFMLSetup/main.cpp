@@ -1,12 +1,17 @@
+/***********************************************************************
+Author      :	Zane Jackson
+Mail        :   Zane.Jackson@mds.ac.nz
+Description :	Interval game (2D platformer)
+File name   :   Main.cpp
+**************************************************************************/
+
 #include <SFML/Graphics.hpp>
 #include "Collisions.h"
 #include "Level.h"
 #include "Physics.h"
 #include "Button.h"
-#include "Player.h"
 #include "Audio.h"
 #include "ParticleSystem.h"
-#include "Enemy.h"
 
 int main()
 {
@@ -15,21 +20,16 @@ int main()
     const int window_height = 720;
     sf::RenderWindow window(sf::VideoMode({ window_width, window_height }), "Interval");
     window.setFramerateLimit(60);
+    sf::RenderWindow debug_window(sf::VideoMode({ 400, 400 }), "Debug Window");
 
     // Background settings
     sf::Texture background_txt("Sprites/background.png");
     sf::RectangleShape background({ window_width, window_height });
     background.setTexture(&background_txt);
 
-    // Particle config
     // create the particle system
     ParticleSystem particles(1000, sf::Color::Red);
-
-    // create a clock for particles
     sf::Clock particle_clock;
-
-    // Create a clock for player time
-    sf::Clock stopwatch;
 
     // Player config
     Player player;
@@ -43,7 +43,7 @@ int main()
 
     // Menu Buttons
     std::vector<Button> buttons;
-    const int button_count = 3;
+    const int button_count = 5;
 
     // Text and font set up
     sf::Font Font1;
@@ -53,17 +53,27 @@ int main()
     }
 
     const int text_size = 16;
+    bool show_credits = false;
 
     // Title text
     sf::Text IntervalText(Font1, "Interval", 32);
+    sf::Text CreditsText(Font1, "Game made by Zane J\nFont by cody@zone38.net\nSprites by Brackey\nBackground by Shackhal\nMusic by Antino & Wells", 16);
     IntervalText.setPosition({500.f, 100.f});
+    CreditsText.setPosition({ 800.f, 300.f });
+
+    sf::Text times_text(Font1, "", text_size);
+    times_text.setPosition({ 140.f, 570.f });
 
     // Create text for the buttons
     sf::Text PlayText(Font1, "Play", text_size);
     sf::Text CreditText(Font1, "Credit", text_size);
     sf::Text QuitText(Font1, "Quit", text_size);
+    sf::Text DecVolText(Font1, "Decrease", text_size);
+    sf::Text IncVolText(Font1, "Increase", text_size);
 
-    sf::Text button_roles[button_count] = {PlayText, CreditText, QuitText };
+    sf::Text button_roles[button_count] = {PlayText, CreditText, QuitText, DecVolText, IncVolText };
+
+    sf::Text ResetButton(Font1, "Reset", text_size);
 
     // Create every menu button
     for (int i = 0; i < button_count; i++)
@@ -72,10 +82,14 @@ int main()
         Button NewButton({550.f, 100.f * i + 200.f }, sf::Color::Green, button_roles[i]);
         buttons.push_back(NewButton);
         button_roles[i].setPosition({ 560.f, 100.f * i + 210.f });
-        button_roles[i].setFillColor(sf::Color::Black);
     }
 
-    // Load all levels
+    // Create debug buttons
+    Button NewButton({ 50.f, 50.f}, sf::Color::Green, ResetButton);
+    buttons.push_back(NewButton);
+    ResetButton.setPosition({ 60.f, 60.f });
+
+    // Load all levels here
     const int levels = 4;
 
     Level MainLevel("Levels/Level1.txt", Forest);
@@ -91,7 +105,7 @@ int main()
     bool between_platform = false; // If the player is currently in between platforms
     bool game_start = false; // If the player is in the main menu or not
 
-    menu_music.Play();
+    menu_music.Play(); // Start playing the music
 
     // While the game is running
     while (window.isOpen())
@@ -112,19 +126,10 @@ int main()
             if (Levels[current_level].level_enemies[i].enemy_shape.getPosition().x > window_width || Levels[current_level].level_enemies[i].enemy_shape.getPosition().x < 0 || Levels[current_level].level_enemies[i].enemy_shape.getPosition().y > window_height || Levels[current_level].level_enemies[i].enemy_shape.getPosition().y < 0) { Levels[current_level].level_enemies[i].Reset(); }
         }
 
-        // make the particle system emitter follow the mouse
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
-        // particles.setEmitter(window.mapPixelToCoords(mouse_pos));
-
-        // update particles using the mouse
-        sf::Time elapsed = particle_clock.restart();
-        particles.update(elapsed);
 
         // Update stopwatch and display to screen
-        sf::Time elapsed2 = stopwatch.getElapsedTime();
-        int current_time = (elapsed2.asSeconds());
-        sf::Text ClockText(Font1, "TIME: " + std::to_string(current_time), 32);
-        ClockText.setPosition({ 150.f, 650.f });
+        Levels[current_level].StopwatchUpdate();
 
         // Check the player hasn't left the map
         if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().x < 0 || player.player_shape.getPosition().y > window_height || player.player_shape.getPosition().y < 0) { player.ResetPosition(); }
@@ -179,12 +184,10 @@ int main()
                         // Ascii values for number keys
                         if (keyPressed->code == sf::Keyboard::Key(i + 27))
                         {
-                            Levels[current_level].UnloadLevel(current_time);
+                            Levels[current_level].UnloadLevel();
                             current_level = i;
-
                             Levels[current_level].LoadLevel();
                             Levels[current_level].Reset(&player);
-                            stopwatch.restart();
                         }
                     }
                 }
@@ -193,9 +196,9 @@ int main()
             // Interactable menu if the game hasn't started
             if (!game_start)
             {
-                // Left MB pressed
                 if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>())
                 {
+                    // Left MB pressed
                     if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
                     {
                         // Did user click on a button
@@ -208,14 +211,14 @@ int main()
                                 if (i == 0)
                                 {
                                     game_start = true;
-                                    stopwatch.restart();
                                     Levels[0].LoadLevel();
+                                    Levels[current_level].Reset(&player);
                                 }
 
                                 // Credits
                                 if (i == 1)
                                 {
-                                    std::cout << "Game made by Zane";
+                                    show_credits = !show_credits;
                                 }
 
                                 // End game
@@ -223,8 +226,37 @@ int main()
                                 {
                                     return 0;
                                 }
+
+                                // Decrease vol
+                                if (i == 3)
+                                {
+                                    menu_music.DecreaseVolume();
+                                }
+
+                                // Increase vol
+                                if (i == 4)
+                                {
+                                    menu_music.IncreaseVolume();
+                                }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Debug window events
+        while (const std::optional event = debug_window.pollEvent())
+        {
+            if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                // Left MB pressed
+                if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+                {
+                    // Menu
+                    if (NewButton.m_ButtonShape.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(debug_window))))
+                    {
+                        Levels[current_level].Reset(&player);
                     }
                 }
             }
@@ -247,7 +279,9 @@ int main()
         // In game events
         if (game_start)
         {
-            // menu_music.sound.stop();
+            // update particles
+            sf::Time elapsed = particle_clock.getElapsedTime();
+            particles.update(elapsed);
 
             // HORIZONTAL MOVEMENT
             // Left
@@ -258,7 +292,12 @@ int main()
                     playerX_vel -= 0.1f;
                 }
 
-                else { particles.setEmitter(player.player_shape.getPosition()); }
+                else 
+                { 
+                    // update particles
+                    particle_clock.restart();
+                    particles.setEmitter(player.player_shape.getPosition());
+                }
 
             }
 
@@ -270,8 +309,14 @@ int main()
                     playerX_vel += 0.1f;
                 }
                 
-                else { particles.setEmitter(player.player_shape.getPosition()); }
+                else 
+                { 
+                    // update particles
+                    particle_clock.restart();
+                    particles.setEmitter(player.player_shape.getPosition());
+                }
             }
+
 
             // Reset player's X velocity if they stop moving left and right
             else
@@ -416,11 +461,13 @@ int main()
             }
 
             // Goal
+            std::string level_times = "";
+
             for (int i = 0; i < Levels[current_level].level_goal_tile.size(); i++)
             {
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_goal_tile[i]->getGlobalBounds()))
                 {
-                    Levels[current_level].UnloadLevel(current_time);
+                    Levels[current_level].UnloadLevel();
                     
                     // If there are still remaining levels
                     if (current_level < levels - 1)
@@ -428,17 +475,20 @@ int main()
                         current_level++;
                         Levels[current_level].LoadLevel();
                         Levels[current_level].Reset(&player);
-                        stopwatch.restart();
                     }
 
                     // This was the last level
                     else
                     {
+                        level_times = "Final times:\n";
+
                         // Display scores to the user
                         for (int i = 0; i < levels; i++)
                         {
-                            std::cout << "Level " << i + 1 << ": " << Levels[i].GetTime();
+                            level_times += "Level " + std::to_string(i + 1) + ": " + std::to_string(Levels[i].GetTime()) + "s\n";
                         }
+
+                        times_text.setString(level_times);
                         game_start = false;
                     }
                 }
@@ -502,7 +552,12 @@ int main()
         }
 
         window.clear();
+        debug_window.clear();
+        
+        debug_window.draw(NewButton.m_ButtonShape);
+        debug_window.draw(ResetButton);
 
+        // Draw the game
         if (game_start)
         {
             window.draw(background);
@@ -526,10 +581,17 @@ int main()
             // Draw player object
             window.draw(player.player_shape);
 
-            // Draw player's time
-            window.draw(ClockText);
+            // Draw player's time and level
+            window.draw(Levels[current_level].StopwatchUpdate());
+            sf::Text level_text(Font1, "Level: " + std::to_string(current_level + 1));
+            level_text.setPosition({500.f, 650.f});
+            window.draw(level_text);
+
+            // Draw particles
+            window.draw(particles);
         }
 
+        // Menu
         else
         {
             window.draw(IntervalText);
@@ -540,11 +602,18 @@ int main()
                 window.draw(buttons[i].m_ButtonShape);
                 window.draw(button_roles[i]);
             }
+
+            // Volume to screen
+            sf::Text volume_text(Font1, "Volume: " + std::to_string(static_cast<int>(menu_music.GetSound().getVolume())), text_size); // Big cast from float, to int, to string, to text
+            volume_text.setPosition({ 540.f, 570.f});
+            window.draw(volume_text);
+
+            // Show credits if buttons were clicked
+            if (show_credits) { window.draw(CreditsText); }
+            window.draw(times_text);
         }
 
-        // Draw particles
-        window.draw(particles);
-
         window.display();
+        debug_window.display();
     }
 }

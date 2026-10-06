@@ -1,3 +1,10 @@
+/***********************************************************************
+Author      :	Zane Jackson
+Mail        :   Zane.Jackson@mds.ac.nz
+Description :	Class for managing object collisions
+File name   :   Collisions.h
+**************************************************************************/
+
 #pragma once
 #include "SFML/Graphics.hpp"
 
