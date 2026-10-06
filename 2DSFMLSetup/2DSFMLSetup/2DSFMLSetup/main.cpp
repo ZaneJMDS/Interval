@@ -104,6 +104,7 @@ int main()
     bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
     bool game_start = false; // If the player is in the main menu or not
+    bool game_completion = false; // If the player has beat the final level
 
     menu_music.Play(); // Start playing the music
 
@@ -210,8 +211,9 @@ int main()
                                 // Start game
                                 if (i == 0)
                                 {
+                                    current_level = 0;
                                     game_start = true;
-                                    Levels[0].LoadLevel();
+                                    Levels[current_level].LoadLevel();
                                     Levels[current_level].Reset(&player);
                                 }
 
@@ -480,6 +482,7 @@ int main()
                     // This was the last level
                     else
                     {
+                        game_completion = true;
                         level_times = "Final times:\n";
 
                         // Display scores to the user
@@ -604,13 +607,18 @@ int main()
             }
 
             // Volume to screen
-            sf::Text volume_text(Font1, "Volume: " + std::to_string(static_cast<int>(menu_music.GetSound().getVolume())), text_size); // Big cast from float, to int, to string, to text
+            sf::Text volume_text(Font1, "Volume: " + std::to_string(int(menu_music.GetSound().getVolume())), text_size); // Big cast from float, to int, to string, to text
             volume_text.setPosition({ 540.f, 570.f});
             window.draw(volume_text);
 
             // Show credits if buttons were clicked
             if (show_credits) { window.draw(CreditsText); }
             window.draw(times_text);
+            
+            sf::Text completion_text(Font1, "Game completed: false", text_size);
+            completion_text.setPosition({ 100.f, 220.f });
+            if (game_completion) { completion_text.setString("Game completed: true"); }
+            window.draw(completion_text);
         }
 
         window.display();
