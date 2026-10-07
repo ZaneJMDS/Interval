@@ -29,7 +29,7 @@ public:
 		// Right of the tile
 		if (entityACenter.x >= entityBCenter.x)
 		{
-			float offset = (_objB->getGlobalBounds().position.x + _objB->getGlobalBounds().size.x) - _objA->getGlobalBounds().position.x;
+			float offset = (_objB->getGlobalBounds().position.x + _objB->getGlobalBounds().size.x - _objA->getGlobalBounds().position.x);
 			_objA->move({ offset, 0 });
 		}
 	}
@@ -53,7 +53,7 @@ public:
 		// Above the tile
 		if (entityACenter.y >= entityBCenter.y)
 		{
-			float offset = (_objB->getGlobalBounds().position.y + _objB->getGlobalBounds().size.y) - _objA->getGlobalBounds().position.y;
+			float offset = (_objB->getGlobalBounds().position.y + _objB->getGlobalBounds().size.y - _objA->getGlobalBounds().position.y);
 			_objA->move({ 0, offset });
 		}
 	}

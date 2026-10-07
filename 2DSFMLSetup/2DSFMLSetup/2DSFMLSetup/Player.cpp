@@ -1,10 +1,21 @@
 #include "Player.h"
 
-Player::Player()
+Player::Player() : jump_sound(jump_buffer)
 {
+    // Setup sounds
+    if (!jump_buffer.loadFromFile("Audio/jump.mp3"))
+    {
+        throw "Error loading sound";
+    }
+
+    jump_sound.setBuffer(jump_buffer);
+    jump_sound.setVolume(25.f);
+
     // Setup player transformation
     player_shape.setSize({ player_size, player_size });
-    player_shape.setPosition({ 100.f, 500.f });
+    
+    ResetPosition();
+
     player_shape.setOrigin(sf::Vector2f(player_size / 2.f, player_size / 2.f));
     
     // Error if can't load image
@@ -28,15 +39,15 @@ void Player::ResetPosition()
     // Reset the player
     player_shape.setPosition({ 100.f, 500.f });
 
+    // Reset the velocity
     Xvelocity = 0.f;
     Yvelocity = 0.f;
 }
 
 void Player::Jump()
 {
-    Audio jump_sound("Audio/jump.mp3");
-    jump_sound.Play();
-    // player_shape.move({ 0.f, _playerY_vel });
+    Yvelocity = -3.f; // Jumper
+    jump_sound.play();
 }
 
 void Player::Animate()

@@ -8,7 +8,6 @@ File name   :   Main.cpp
 #include <SFML/Graphics.hpp>
 #include "Collisions.h"
 #include "Level.h"
-#include "Physics.h"
 #include "Button.h"
 #include "Audio.h"
 #include "ParticleSystem.h"
@@ -36,6 +35,10 @@ int main()
 
     // Audio
     Audio menu_music("Audio/menu.mp3");
+    menu_music.Play(); // Start playing the music
+
+    Audio jump_sound("Audio/jump.mp3");
+    jump_sound.Play();
 
     // Menu Buttons
     std::vector<Button> buttons;
@@ -86,7 +89,7 @@ int main()
     ResetButton.setPosition({ 60.f, 60.f });
 
     // Load all levels here
-    const int levels = 8;
+    const int levels = 9;
 
     Level MainLevel("Levels/Level1.txt", Forest);
     Level SecondLevel("Levels/Level2.txt", Forest);
@@ -96,17 +99,17 @@ int main()
     Level SixthLevel("Levels/level6.txt", Mountain);
     Level SeventhLevel("Levels/level7.txt", Snowy);
     Level EigthLevel("Levels/level8.txt", Snowy);
+    Level NinthLevel("Levels/level9.txt", Snowy);
 
     int current_level = 0;
 
-    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel, FifthLevel, SixthLevel, SeventhLevel, EigthLevel };
+    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel, FifthLevel, SixthLevel, SeventhLevel, EigthLevel, NinthLevel};
 
+    // Starting values
     bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
     bool game_start = false; // If the player is in the main menu or not
     bool game_completion = false; // If the player has beat the final level
-
-    menu_music.Play(); // Start playing the music
 
     // While the game is running
     while (window.isOpen())
@@ -358,17 +361,9 @@ int main()
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        // Player can only jump off if they are on top of the block when grvaity is true
-                        if (player.player_shape.getPosition().y < Levels[current_level].level_wall_tiles[i]->getPosition().y && gravity)
+                        // Player can only jump off if they are on top of the block
+                        if (player.player_shape.getPosition().y < Levels[current_level].level_wall_tiles[i]->getPosition().y)
                         {
-                            player.Yvelocity = -3.f;
-                            player.Jump();
-                        }
-
-                        // 
-                        if (player.player_shape.getPosition().y > Levels[current_level].level_wall_tiles[i]->getPosition().y && !gravity)
-                        {
-                            player.Yvelocity = 3.f;
                             player.Jump();
                         }
                     }
@@ -386,7 +381,6 @@ int main()
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        player.Yvelocity = -3.f;
                         player.Jump();
                     }
 
@@ -430,7 +424,6 @@ int main()
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        player.Yvelocity = -3.f;
                         player.Jump();
                     }
                 }
@@ -448,8 +441,8 @@ int main()
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
-                    player.Yvelocity = -4.0f;
                     player.Jump();
+                    player.Yvelocity = -4.0f; // Extra height because bouncy tile
                 }
             }
 
@@ -501,6 +494,21 @@ int main()
             player.Move();
 
             // COLLISION PROCESSING - X
+            
+            // VERY IMPORTANT DO THIS BOX COLLISION FIRST
+            // Player collides with BOX
+            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
+            {
+                // Move the box
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
+                {
+                    if (player.Xvelocity != 0.f)
+                    {
+                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
+                    }
+                }
+            }
+            
             // WALL collides with
             for (int i = 0; i < Levels[current_level].level_wall_tiles.size(); i++)
             {
@@ -526,19 +534,6 @@ int main()
                     if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
                         Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
-                    }
-                }
-            }
-
-            // Player collides with BOX
-            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
-            {
-                // Move the box
-                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
-                {
-                    if (player.Xvelocity != 0.f)
-                    {
-                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
                     }
                 }
             }
@@ -615,6 +610,7 @@ int main()
             if (show_credits) { window.draw(CreditsText); }
             window.draw(times_text);
             
+            // Game completion status
             sf::Text completion_text(Font1, "Game completed: false", text_size);
             completion_text.setPosition({ 100.f, 220.f });
             if (game_completion) { completion_text.setString("Game completed: true"); }

@@ -1,9 +1,8 @@
 #include "Enemy.h"
 
-Enemy::Enemy(sf::Vector2f _start_pos, sf::Texture _enemy_texture)
+Enemy::Enemy(sf::Vector2f _start_pos)
 {
     start_pos = _start_pos;
-    enemy_texture2 = _enemy_texture;
 
     // Setup player transformation
     enemy_shape.setSize({ enemy_size, enemy_size });
@@ -14,7 +13,6 @@ Enemy::Enemy(sf::Vector2f _start_pos, sf::Texture _enemy_texture)
     enemy_shape.setFillColor(sf::Color::Green);
 
     enemy_shape.setTextureRect(sf::IntRect({ 4, 32 }, { 16, 16 })); // Starting frame
-    // enemy_shape.setTexture(&enemy_texture2);
 }
 
 Enemy::~Enemy()

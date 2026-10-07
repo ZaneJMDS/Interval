@@ -33,7 +33,11 @@ public:
 	void UpdatePlayer(float _Yvelocity, float _dt);
 
 private:
-	const float player_size = 50.f;
+	const float player_size = 48.f;
 	sf::Clock animation_clock;
+
+	// For Music
+	sf::SoundBuffer jump_buffer;
+	sf::Sound jump_sound;
 };
 

@@ -263,8 +263,10 @@ void Level::LoadLevel()
 			// ENEMIES
 			if (level_array[x][y] == 'e')
 			{
-				sf::Vector2f start_pos(x * 64, y * 64);
-				Enemy NewEnemy(start_pos, enemy_texture);
+				sf::Vector2f start_pos(x * 64, y * 64 + 40);
+				Enemy NewEnemy(start_pos);
+
+				NewEnemy.enemy_shape.setTexture(&enemy_texture);
 
 				level_enemies.push_back(NewEnemy);
 			}
