@@ -34,11 +34,7 @@ int main()
     // Player config
     Player player;
 
-    float playerY_vel = 0.f;
-    float playerX_vel = 0.f;
-
     // Audio
-    Audio jump_sound("Audio/jump.mp3");
     Audio menu_music("Audio/menu.mp3");
 
     // Menu Buttons
@@ -128,6 +124,8 @@ int main()
         }
 
         sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
+
+        player.Animate();
 
         // Update stopwatch and display to screen
         Levels[current_level].StopwatchUpdate();
@@ -289,9 +287,9 @@ int main()
             // Left
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
             {
-                if (playerX_vel > -5.f)
+                if (player.Xvelocity > -5.f)
                 {
-                    playerX_vel -= 0.1f;
+                    player.Xvelocity -= 0.1f;
                 }
 
                 else 
@@ -306,9 +304,9 @@ int main()
             // Right
             else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
             {
-                if (playerX_vel < 5.f)
+                if (player.Xvelocity < 5.f)
                 {
-                    playerX_vel += 0.1f;
+                    player.Xvelocity += 0.1f;
                 }
                 
                 else 
@@ -323,24 +321,24 @@ int main()
             // Reset player's X velocity if they stop moving left and right
             else
             {
-                if (playerX_vel < 0.2f && playerX_vel > -0.2f) { playerX_vel = 0.f; }
-                if (playerX_vel > 0.f) { playerX_vel -= 0.2f;}
-                if (playerX_vel < 0.f) { playerX_vel += 0.2f;}
+                if (player.Xvelocity < 0.2f && player.Xvelocity > -0.2f) { player.Xvelocity = 0.f; }
+                if (player.Xvelocity > 0.f) { player.Xvelocity -= 0.2f;}
+                if (player.Xvelocity < 0.f) { player.Xvelocity += 0.2f;}
             }
 
             // Normal gravity
             if (gravity)
             {
-                playerY_vel = player.UpdatePlayer(playerY_vel, 1.f, 0.0198f);
+                player.UpdatePlayer(1.f, 0.0198f);
             }
 
             // Reversed gravtity
             else
             {
-                playerY_vel = player.UpdatePlayer(playerY_vel, -1.f, 0.0198f);
+                player.UpdatePlayer(-1.f, 0.0198f);
             }
 
-            player.Gravity(playerY_vel);
+            player.Gravity();
 
             // COLLISION PROCESSING - Y
             // Walls
@@ -350,7 +348,7 @@ int main()
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i], false);
-                    playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
+                    player.Yvelocity = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
 
                     // VERTICAL MOVEMENT
                     // Jump
@@ -359,15 +357,15 @@ int main()
                         // Player can only jump off if they are on top of the block when grvaity is true
                         if (player.player_shape.getPosition().y < Levels[current_level].level_wall_tiles[i]->getPosition().y && gravity)
                         {
-                            playerY_vel = -3.f;
-                            jump_sound.GetSound().play();
+                            player.Yvelocity = -3.f;
+                            player.Jump();
                         }
 
                         // 
                         if (player.player_shape.getPosition().y > Levels[current_level].level_wall_tiles[i]->getPosition().y && !gravity)
                         {
-                            playerY_vel = 3.f;
-                            jump_sound.GetSound().play();
+                            player.Yvelocity = 3.f;
+                            player.Jump();
                         }
                     }
                 }
@@ -394,24 +392,25 @@ int main()
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
                     {
-                        playerY_vel = -3.f;
+                        player.Yvelocity = -3.f;
+                        player.Jump();
                     }
 
                     // Check if player is currently below platform
-                    if (playerY_vel < 0 && gravity) { between_platform = true; }
-                    else if (playerY_vel > 0 && !gravity) { between_platform = true; }
+                    if (player.Yvelocity < 0 && gravity) { between_platform = true; }
+                    else if (player.Yvelocity > 0 && !gravity) { between_platform = true; }
 
                     // Down through platform
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
                     {
-                        playerY_vel = 3.f;
+                        player.Yvelocity = 3.f;
                         between_platform = true;
                     }
 
                     // Only collide with platform if player isn't moving up or down and their velocity is 0
                     if (!between_platform)
                     {
-                        playerY_vel = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
+                        player.Yvelocity = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
                         Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_platform_tiles[i], false);
                     }
                 }
@@ -431,13 +430,20 @@ int main()
                 {
                     // Swap the collisions around to move the box instead of the player
                     Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
+
+                    // Jump
+                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+                    {
+                        player.Yvelocity = -3.f;
+                        player.Jump();
+                    }
                 }
             }
 
             // Fall
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
             {
-                playerY_vel = 5.0f;
+                player.Yvelocity = 5.0f;
             }
 
             // Drum
@@ -448,8 +454,8 @@ int main()
                     Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
 
                     // VERTICAL MOVEMENT
-                    playerY_vel = -5.0f;
-                    jump_sound.GetSound().play();
+                    player.Yvelocity = -5.0f;
+                    player.Jump();
                 }
             }
 
@@ -498,7 +504,7 @@ int main()
             }
 
             // Move on X
-            player.Move(playerX_vel);
+            player.Move();
 
             // COLLISION PROCESSING - X
             // WALL collides with

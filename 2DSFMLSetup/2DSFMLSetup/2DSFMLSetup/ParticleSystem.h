@@ -80,8 +80,8 @@ private:
 
     std::vector<Particle> m_particles;
     sf::VertexArray       m_vertices;
-    sf::Time              m_lifetime{ sf::seconds(3) };
+    sf::Time              m_lifetime{ sf::seconds(3) }; // How long the particles last for
     sf::Vector2f          m_emitter;
-    sf::Color             m_color;
+    sf::Color             m_color; // Colour of the particles
 };
 

@@ -7,7 +7,7 @@ File name   :   Player.h
 
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
+#include "Audio.h"
 
 class Player
 {
@@ -16,19 +16,24 @@ public:
 	sf::RectangleShape player_shape;
 	sf::Texture player_texture;
 
+	float Yvelocity = 0.f;
+	float Xvelocity = 0.f;
+
 	Player();
 	~Player();
 
 	void Rotate() { player_shape.rotate(sf::degrees(180)); }
 	void ResetPosition();
-	void Gravity(float _playerY_vel) { player_shape.move({ 0.f, _playerY_vel }); }
-	void Jump(float _playerY_vel);
-	void Move(float _playerX_vel) { player_shape.move({ _playerX_vel, 0.f }); }
+	void Gravity() { player_shape.move({ 0.f, Yvelocity }); }
+	void Jump();
+	void Move() { player_shape.move({ Xvelocity, 0.f }); }
+	void Animate();
 
 	// Update player's position relative to gravity
-	float UpdatePlayer(float _playerYvel, float _Yvelocity, float _dt);
+	void UpdatePlayer(float _Yvelocity, float _dt);
 
 private:
 	const float player_size = 50.f;
+	sf::Clock animation_clock;
 };
 
