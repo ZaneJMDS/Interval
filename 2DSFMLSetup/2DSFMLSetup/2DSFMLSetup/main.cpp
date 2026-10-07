@@ -86,16 +86,20 @@ int main()
     ResetButton.setPosition({ 60.f, 60.f });
 
     // Load all levels here
-    const int levels = 4;
+    const int levels = 8;
 
     Level MainLevel("Levels/Level1.txt", Forest);
-    Level SecondLevel("Levels/Level2.txt", Desert);
-    Level ThirdLevel("Levels/Level3.txt", Mountain);
-    Level FourthLevel("Levels/Level4.txt", Snowy);
+    Level SecondLevel("Levels/Level2.txt", Forest);
+    Level ThirdLevel("Levels/Level3.txt", Desert);
+    Level FourthLevel("Levels/Level4.txt", Desert);
+    Level FifthLevel("Levels/level5.txt", Mountain);
+    Level SixthLevel("Levels/level6.txt", Mountain);
+    Level SeventhLevel("Levels/level7.txt", Snowy);
+    Level EigthLevel("Levels/level8.txt", Snowy);
 
     int current_level = 0;
 
-    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel };
+    Level Levels[levels] = { MainLevel, SecondLevel, ThirdLevel, FourthLevel, FifthLevel, SixthLevel, SeventhLevel, EigthLevel };
 
     bool gravity = true; // Change the direction / effect of gravity
     bool between_platform = false; // If the player is currently in between platforms
@@ -131,7 +135,7 @@ int main()
         Levels[current_level].StopwatchUpdate();
 
         // Check the player hasn't left the map
-        if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().x < 0 || player.player_shape.getPosition().y > window_height || player.player_shape.getPosition().y < 0) { player.ResetPosition(); }
+        if (player.player_shape.getPosition().x > window_width || player.player_shape.getPosition().x < -50 || player.player_shape.getPosition().y > window_height || player.player_shape.getPosition().y < -50) { Levels[current_level].Reset(&player); }
 
         // Only do these events if the user has the window selected
         while (const std::optional event = window.pollEvent())
@@ -329,13 +333,13 @@ int main()
             // Normal gravity
             if (gravity)
             {
-                player.UpdatePlayer(1.f, 0.0198f);
+                player.UpdatePlayer(1.f, 0.02f);
             }
 
             // Reversed gravtity
             else
             {
-                player.UpdatePlayer(-1.f, 0.0198f);
+                player.UpdatePlayer(-1.f, 0.02f);
             }
 
             player.Gravity();
@@ -369,16 +373,6 @@ int main()
                         }
                     }
                 }
-
-                // with BOX
-                for (int j = 0; j < Levels[current_level].level_box_tiles.size(); j++)
-                {
-                    // Move the BOX
-                    if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
-                    {
-                        Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
-                    }
-                }
             }
 
             int platforms_collided = 0; // Counter to see if the player isn't colliding with any platform
@@ -403,7 +397,6 @@ int main()
                     // Down through platform
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
                     {
-                        player.Yvelocity = 3.f;
                         between_platform = true;
                     }
 
@@ -428,8 +421,11 @@ int main()
             {
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
                 {
-                    // Swap the collisions around to move the box instead of the player
-                    Collisions::ResolveYCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
+                    // Stop the player if they are above the box
+                    if (player.player_shape.getPosition().y < Levels[current_level].level_box_tiles[i]->getPosition().y)
+                    {
+                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_box_tiles[i], false);
+                    }
 
                     // Jump
                     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
@@ -443,7 +439,7 @@ int main()
             // Fall
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
             {
-                player.Yvelocity = 5.0f;
+                player.Yvelocity = 4.0f;
             }
 
             // Drum
@@ -452,9 +448,7 @@ int main()
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
                     Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
-
-                    // VERTICAL MOVEMENT
-                    player.Yvelocity = -5.0f;
+                    player.Yvelocity = -4.0f;
                     player.Jump();
                 }
             }
@@ -542,7 +536,7 @@ int main()
                 // Move the box
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
                 {
-                    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+                    if (player.Xvelocity != 0.f)
                     {
                         Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
                     }

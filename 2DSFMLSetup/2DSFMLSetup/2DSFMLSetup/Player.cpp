@@ -27,6 +27,9 @@ void Player::ResetPosition()
 {
     // Reset the player
     player_shape.setPosition({ 100.f, 500.f });
+
+    Xvelocity = 0.f;
+    Yvelocity = 0.f;
 }
 
 void Player::Jump()
@@ -47,10 +50,14 @@ void Player::Animate()
     if (current_time < 0.5f) { player_shape.setTextureRect(sf::IntRect({ 0, 0 }, { 24, 24 })); }
     else if (current_time < 1.f) { player_shape.setTextureRect(sf::IntRect({ 24, 0 }, { 24, 24 })); }
     else { animation_clock.restart(); }
+
+    // Make player face the correct way
+    if (Xvelocity < -0.5f) { player_shape.setScale({ 1.0f, 1.0f }); } // Face left
+    else { player_shape.setScale({ -1.0f, 1.0f }); } // Face right
 }
 
 // Update player's position relative to gravity
 void Player::UpdatePlayer(float _Yvelocity, float _dt)
 {
-    if (Yvelocity < 4.f) { Yvelocity += _Yvelocity * _dt; }
+    if (Yvelocity < 5.f) { Yvelocity += _Yvelocity * _dt; }
 }

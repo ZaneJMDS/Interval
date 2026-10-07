@@ -23,7 +23,7 @@ S, <Down arrow>: Fall
 
 
 
-Special:
+Special:s
 
 G: Change gravity direction
 
