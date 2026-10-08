@@ -14,6 +14,7 @@ File name   :   Level.h
 #include <fstream>
 #include <iostream>
 
+// Biomes
 enum terrain_types
 {
 	Forest,
@@ -39,7 +40,6 @@ public:
 
 	// Enemies
 	std::vector<Enemy> level_enemies; // Default enemy that walks back and forward
-	std::vector<sf::RectangleShape*> level_copycat; // Enemy that copies the player's movement
 	
 	// Boxes
 	std::vector<Box> level_boxes; // A class to hold the location of each box

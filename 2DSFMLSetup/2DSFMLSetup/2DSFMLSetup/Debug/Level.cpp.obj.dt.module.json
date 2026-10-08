@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\Level.obj",
+            "outputs": [
+                "Debug\\Level.cpp.obj.dt.module.json",
+                "Debug\\Level.cpp.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

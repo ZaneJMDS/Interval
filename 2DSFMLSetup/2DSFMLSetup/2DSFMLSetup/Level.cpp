@@ -23,6 +23,16 @@ Level::Level(std::string _filepath, terrain_types _terrain_type) : filepath(_fil
 		throw "Error loading image";
 	}
 
+	if (!drum_texture.loadFromFile("Sprites/spring.png"))
+	{
+		throw "Error loading image";
+	}
+
+	if (!spike_texture.loadFromFile("Sprites/spike.png"))
+	{
+		throw "Error loading image";
+	}
+
 	if (!Font1.openFromFile("PressStart2P-Regular.ttf"))
 	{
 		throw "Font could not be loaded";
@@ -200,8 +210,8 @@ void Level::LoadLevel()
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
 				
-				NewBox->setFillColor(sf::Color::Green);// Spawn a box at current location
-				
+				NewBox->setTexture(&drum_texture);
+
 				// Collider logic
 				level_drum_tiles.push_back(NewBox);
 			}
@@ -212,8 +222,8 @@ void Level::LoadLevel()
 				// Spawn a box at current location
 				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
 				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
-				
-				NewBox->setFillColor(sf::Color::Red);// Spawn a box at current location
+
+				NewBox->setTexture(&spike_texture);
 
 				level_spike_tiles.push_back(NewBox);
 			}
@@ -284,17 +294,12 @@ void Level::LoadLevel()
 
 void Level::UnloadLevel()
 {
+	// Get the player's final time
 	final_time = current_time;
 
 	// Clear out all the current tiles in the level
 	for (int i = 0; i < level_tiles.size(); i++)
 	{
-		// Clears specific types of tile
-		for (int j = 0; j < level_tiles[i].size(); j++)
-		{
-			// Delete all tiles that were placed
-			// delete level_tiles[i][j];
-		}
 		level_tiles[i].clear();
 	}
 

@@ -36,7 +36,7 @@ private:
 	const float player_size = 48.f;
 	sf::Clock animation_clock;
 
-	// For Music
+	// For Sound
 	sf::SoundBuffer jump_buffer;
 	sf::Sound jump_sound;
 };

@@ -3,8 +3,8 @@
     x     xxx    xxx
     x     x x    x
     x     x x    xxx
-xxx   xxx     xxp
+xxx   xxx     xp
 x     x x     x x
 xxx   x x     x x
 x     x x b   xgx
-xxxdddx xpppppx
+xxxppdx xpppppx

@@ -1,17 +1,15 @@
 #include "Audio.h"
 
-Audio::Audio(std::string _src) : sound(buffer)
+Audio::Audio(std::string _src) : src(_src)
 {
-	src = _src;
-
 	// Throw Error if mispelled the file path
-	if (!buffer.loadFromFile(src))
+	if (!sound.openFromFile(src))
 	{
 		throw "Error loading sound";
 	}
 
-	sound.setBuffer(buffer);
 	sound.setVolume(25.f);
+	sound.setLooping(true);
 }
 
 Audio::~Audio()

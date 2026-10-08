@@ -1,5 +1,5 @@
 /***********************************************************************
-Author      :	SFML
+Author      :	SFML documentation
 Description :	Class for adding particles
 File name   :   ParticleSystem.h
 **************************************************************************/

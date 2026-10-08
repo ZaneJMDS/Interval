@@ -33,12 +33,9 @@ int main()
     // Player config
     Player player;
 
-    // Audio
+    // Music
     Audio menu_music("Audio/menu.mp3");
     menu_music.Play(); // Start playing the music
-
-    Audio jump_sound("Audio/jump.mp3");
-    jump_sound.Play();
 
     // Menu Buttons
     std::vector<Button> buttons;
@@ -56,12 +53,12 @@ int main()
 
     // Title text
     sf::Text IntervalText(Font1, "Interval", 32);
-    sf::Text CreditsText(Font1, "Game made by Zane J\nFont by cody@zone38.net\nSprites by Brackey\nBackground by Shackhal\nMusic by Antino & Wells", 16);
+    sf::Text CreditsText(Font1, "Game made by Zane J\nFont by Cody\nTiles / Slime by Brackey\nAdditional sprites by Kenny\nBackground art by Shackhal\nMusic by Antino & Wells\nJump sfx by Sega", 16);
     IntervalText.setPosition({500.f, 100.f});
     CreditsText.setPosition({ 800.f, 300.f });
 
     sf::Text times_text(Font1, "", text_size);
-    times_text.setPosition({ 140.f, 570.f });
+    times_text.setPosition({ 140.f, 350.f });
 
     // Create text for the buttons
     sf::Text PlayText(Font1, "Play", text_size);
@@ -72,6 +69,7 @@ int main()
 
     sf::Text button_roles[button_count] = {PlayText, CreditText, QuitText, DecVolText, IncVolText };
 
+    // Create debug reset button
     sf::Text ResetButton(Font1, "Reset", text_size);
 
     // Create every menu button
@@ -110,6 +108,7 @@ int main()
     bool between_platform = false; // If the player is currently in between platforms
     bool game_start = false; // If the player is in the main menu or not
     bool game_completion = false; // If the player has beat the final level
+    bool show_debug = false; // If the debug screen will show to the user
 
     // While the game is running
     while (window.isOpen())
@@ -129,8 +128,6 @@ int main()
             // Check the enemy hasn't left the map
             if (Levels[current_level].level_enemies[i].enemy_shape.getPosition().x > window_width || Levels[current_level].level_enemies[i].enemy_shape.getPosition().x < 0 || Levels[current_level].level_enemies[i].enemy_shape.getPosition().y > window_height || Levels[current_level].level_enemies[i].enemy_shape.getPosition().y < 0) { Levels[current_level].level_enemies[i].Reset(); }
         }
-
-        sf::Vector2i mouse_pos = sf::Mouse::getPosition(window);
 
         player.Animate();
 
@@ -181,23 +178,13 @@ int main()
                     menu_music.IncreaseVolume();
                 }
 
-                // Dev Debug Level switcher
-                for (int i = 0; i < levels; i++)
+                if (keyPressed->code == sf::Keyboard::Key::Escape)
                 {
-                    // Dont unload the level if it is current one 
-                    if (i != current_level)
-                    {
-                        // Ascii values for number keys
-                        if (keyPressed->code == sf::Keyboard::Key(i + 27))
-                        {
-                            Levels[current_level].UnloadLevel();
-                            current_level = i;
-                            Levels[current_level].LoadLevel();
-                            Levels[current_level].Reset(&player);
-                        }
-                    }
+                    show_debug = !show_debug;
                 }
             }
+
+            debug_window.setVisible(show_debug);
 
             // Interactable menu if the game hasn't started
             if (!game_start)
@@ -255,6 +242,7 @@ int main()
         // Debug window events
         while (const std::optional event = debug_window.pollEvent())
         {
+            // Buttons
             if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>())
             {
                 // Left MB pressed
@@ -264,6 +252,29 @@ int main()
                     if (NewButton.m_ButtonShape.getGlobalBounds().contains(sf::Vector2f(sf::Mouse::getPosition(debug_window))))
                     {
                         Levels[current_level].Reset(&player);
+                    }
+                }
+            }
+
+            // Keybinds that the player should click, not hold
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
+            {
+                // Debug Level switcher
+                for (int i = 0; i < levels; i++)
+                {
+                    // Dont unload the level if it is current one 
+                    if (i != current_level)
+                    {
+                        // Ascii values for number keys
+                        if (keyPressed->code == sf::Keyboard::Key(i + 27))
+                        {
+                            
+                            if (game_start) { Levels[current_level].UnloadLevel(); }
+                            else { game_start = true; }
+                            current_level = i;
+                            Levels[current_level].LoadLevel();
+                            Levels[current_level].Reset(&player);
+                        }
                     }
                 }
             }
@@ -354,7 +365,7 @@ int main()
                 // with Player
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i], false);
+                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i]);
                     player.Yvelocity = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
 
                     // VERTICAL MOVEMENT
@@ -398,7 +409,7 @@ int main()
                     if (!between_platform)
                     {
                         player.Yvelocity = 0.f; // Set the players Y velocity to 0 if they are colliding with an object
-                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_platform_tiles[i], false);
+                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_platform_tiles[i]);
                     }
                 }
 
@@ -418,7 +429,7 @@ int main()
                     // Stop the player if they are above the box
                     if (player.player_shape.getPosition().y < Levels[current_level].level_box_tiles[i]->getPosition().y)
                     {
-                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_box_tiles[i], false);
+                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_box_tiles[i]);
                     }
 
                     // Jump
@@ -440,7 +451,7 @@ int main()
             {
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
+                    Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i]);
                     player.Jump();
                     player.Yvelocity = -4.0f; // Extra height because bouncy tile
                 }
@@ -504,7 +515,7 @@ int main()
                 {
                     if (player.Xvelocity != 0.f)
                     {
-                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape, false);
+                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape);
                     }
                 }
             }
@@ -515,7 +526,7 @@ int main()
                 // PLAYER
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i], false);
+                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_wall_tiles[i]);
                 }
 
                 // ENEMY
@@ -523,7 +534,7 @@ int main()
                 {
                     if (Levels[current_level].level_enemies[j].enemy_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
-                        Collisions::ResolveXCollisions(&Levels[current_level].level_enemies[j].enemy_shape, Levels[current_level].level_wall_tiles[i], false);
+                        Collisions::ResolveXCollisions(&Levels[current_level].level_enemies[j].enemy_shape, Levels[current_level].level_wall_tiles[i]);
                         Levels[current_level].level_enemies[j].Rotate();
                     }
                 }
@@ -533,7 +544,7 @@ int main()
                 {
                     if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
-                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i], false);
+                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i]);
                     }
                 }
             }
@@ -544,7 +555,7 @@ int main()
                 // Stop the player
                 if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_drum_tiles[i]->getGlobalBounds()))
                 {
-                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i], false);
+                    Collisions::ResolveXCollisions(&player.player_shape, Levels[current_level].level_drum_tiles[i]);
                 }
             }
         }
@@ -602,7 +613,7 @@ int main()
             }
 
             // Volume to screen
-            sf::Text volume_text(Font1, "Volume: " + std::to_string(int(menu_music.GetSound().getVolume())), text_size); // Big cast from float, to int, to string, to text
+            sf::Text volume_text(Font1, "Volume: " + std::to_string(int(menu_music.sound.getVolume())), text_size); // Big cast from float, to int, to string, to text
             volume_text.setPosition({ 540.f, 570.f});
             window.draw(volume_text);
 

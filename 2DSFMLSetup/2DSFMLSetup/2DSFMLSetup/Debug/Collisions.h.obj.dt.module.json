@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\Collisions.obj",
+            "outputs": [
+                "Debug\\Collisions.h.obj.dt.module.json",
+                "Debug\\Collisions.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

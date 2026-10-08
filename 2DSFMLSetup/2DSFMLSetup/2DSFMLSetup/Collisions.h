@@ -1,7 +1,6 @@
 /***********************************************************************
-Author      :	Zane Jackson
-Mail        :   Zane.Jackson@mds.ac.nz
-Description :	Class for managing object collisions
+Author      :	Zac Watson
+Description :	Class for managing object collisions, from workshop
 File name   :   Collisions.h
 **************************************************************************/
 
@@ -11,7 +10,7 @@ File name   :   Collisions.h
 static class Collisions
 {
 public:
-	static void ResolveXCollisions(sf::Shape* _objA, sf::Shape* _objB, bool _secondObjectWall)
+	static void ResolveXCollisions(sf::Shape* _objA, sf::Shape* _objB)
 	{
 		sf::Vector2f entityACenter = { (_objA->getGlobalBounds().position.x + _objA->getGlobalBounds().size.x / 2.0f),
 									  (_objA->getGlobalBounds().position.y + _objA->getGlobalBounds().size.y / 2.0f) };
@@ -35,7 +34,7 @@ public:
 	}
 
 	// Vertical collision between 2 objects
-	static void ResolveYCollisions(sf::Shape* _objA, sf::Shape* _objB, bool _secondObjectWall)
+	static void ResolveYCollisions(sf::Shape* _objA, sf::Shape* _objB)
 	{
 		sf::Vector2f entityACenter = { (_objA->getGlobalBounds().position.x + _objA->getGlobalBounds().size.x / 2.0f),
 									  (_objA->getGlobalBounds().position.y + _objA->getGlobalBounds().size.y / 2.0f) };

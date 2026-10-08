@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\Box.obj",
+            "outputs": [
+                "Debug\\Box.h.obj.dt.module.json",
+                "Debug\\Box.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

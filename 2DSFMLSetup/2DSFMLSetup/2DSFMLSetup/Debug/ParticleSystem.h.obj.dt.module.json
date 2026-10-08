@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\ParticleSystem.obj",
+            "outputs": [
+                "Debug\\ParticleSystem.h.obj.dt.module.json",
+                "Debug\\ParticleSystem.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

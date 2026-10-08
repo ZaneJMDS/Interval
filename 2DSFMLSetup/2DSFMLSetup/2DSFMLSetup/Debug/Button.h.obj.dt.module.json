@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\Button.obj",
+            "outputs": [
+                "Debug\\Button.h.obj.dt.module.json",
+                "Debug\\Button.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

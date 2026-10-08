@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Debug\\Audio.obj",
+            "outputs": [
+                "Debug\\Audio.cpp.obj.dt.module.json",
+                "Debug\\Audio.cpp.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}
