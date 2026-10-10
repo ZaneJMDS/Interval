@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Enemy.obj",
+            "outputs": [
+                "Release\\Enemy.h.obj.dt.module.json",
+                "Release\\Enemy.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

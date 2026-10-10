@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Audio.obj",
+            "outputs": [
+                "Release\\Audio.h.obj.dt.module.json",
+                "Release\\Audio.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

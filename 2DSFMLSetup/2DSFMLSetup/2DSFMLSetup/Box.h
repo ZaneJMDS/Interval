@@ -11,10 +11,12 @@ File name   :   Box.h
 class Box
 {
 public:
-	Box(sf::RectangleShape* NewBox);
+	sf::RectangleShape box_shape;
+
+	Box(sf::Vector2f _start_pos);
 	~Box();
 
-	void ResetPosition(sf::RectangleShape* NewBox) { NewBox->setPosition(start_pos); }
+	void ResetPosition() { box_shape.setPosition(start_pos); }
 
 private:
 	sf::Vector2f start_pos;

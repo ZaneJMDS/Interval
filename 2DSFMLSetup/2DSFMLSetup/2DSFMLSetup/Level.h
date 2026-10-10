@@ -32,8 +32,7 @@ public:
 
 	// Tiles
 	std::vector<sf::RectangleShape*> level_wall_tiles; // Tiles with collision
-	std::vector<sf::RectangleShape*> level_platform_tiles; // Tiles to jump and fall through with no side collision
-	std::vector<sf::RectangleShape*> level_box_tiles; // Tiles the player can move
+	std::vector<sf::RectangleShape*> level_platform_tiles; // Tiles to jump and fall through with no side 
 	std::vector<sf::RectangleShape*> level_drum_tiles; // Tiles that cause the player to launch with a high velocity
 	std::vector<sf::RectangleShape*> level_spike_tiles; // Tiles that kill the player
 	std::vector<sf::RectangleShape*> level_goal_tile; // The tile the player needs to reach
@@ -42,7 +41,7 @@ public:
 	std::vector<Enemy> level_enemies; // Default enemy that walks back and forward
 	
 	// Boxes
-	std::vector<Box> level_boxes; // A class to hold the location of each box
+	std::vector<Box> level_boxes; // Tiles the player can move
 
 	// Textures for said tiles
 	sf::Texture world_texture;
@@ -73,7 +72,7 @@ public:
 private:
 	sf::Font Font1;
 	int current_time;
-	int final_time;
+	int final_time = 999;
 	std::string filepath;
 	terrain_types terrain_type;
 };

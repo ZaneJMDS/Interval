@@ -109,6 +109,7 @@ int main()
     bool game_start = false; // If the player is in the main menu or not
     bool game_completion = false; // If the player has beat the final level
     bool show_debug = false; // If the debug screen will show to the user
+    int total_time = 0; // Total time for all levels
 
     // While the game is running
     while (window.isOpen())
@@ -155,11 +156,11 @@ int main()
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
                 // Swap gravity direction
-                if (keyPressed->code == sf::Keyboard::Key::G)
+                /*if (keyPressed->code == sf::Keyboard::Key::G)
                 {
                     gravity = !gravity;
                     player.Rotate();
-                }
+                }*/
 
                 // Reset level
                 if (keyPressed->code == sf::Keyboard::Key::R)
@@ -422,14 +423,14 @@ int main()
             }
 
             // Boxes
-            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_boxes.size(); i++)
             {
-                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_boxes[i].box_shape.getGlobalBounds()))
                 {
                     // Stop the player if they are above the box
-                    if (player.player_shape.getPosition().y < Levels[current_level].level_box_tiles[i]->getPosition().y)
+                    if (player.player_shape.getPosition().y < Levels[current_level].level_boxes[i].box_shape.getPosition().y)
                     {
-                        Collisions::ResolveYCollisions(&player.player_shape, Levels[current_level].level_box_tiles[i]);
+                        Collisions::ResolveYCollisions(&player.player_shape, &Levels[current_level].level_boxes[i].box_shape);
                     }
 
                     // Jump
@@ -486,6 +487,7 @@ int main()
                     // This was the last level
                     else
                     {
+                        total_time = 0;
                         game_completion = true;
                         level_times = "Final times:\n";
 
@@ -493,6 +495,7 @@ int main()
                         for (int i = 0; i < levels; i++)
                         {
                             level_times += "Level " + std::to_string(i + 1) + ": " + std::to_string(Levels[i].GetTime()) + "s\n";
+                            total_time += Levels[i].GetTime();
                         }
 
                         times_text.setString(level_times);
@@ -508,14 +511,14 @@ int main()
             
             // VERY IMPORTANT DO THIS BOX COLLISION FIRST
             // Player collides with BOX
-            for (int i = 0; i < Levels[current_level].level_box_tiles.size(); i++)
+            for (int i = 0; i < Levels[current_level].level_boxes.size(); i++)
             {
                 // Move the box
-                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_box_tiles[i]->getGlobalBounds()))
+                if (player.player_shape.getGlobalBounds().findIntersection(Levels[current_level].level_boxes[i].box_shape.getGlobalBounds()))
                 {
                     if (player.Xvelocity != 0.f)
                     {
-                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[i], &player.player_shape);
+                        Collisions::ResolveXCollisions(&Levels[current_level].level_boxes[i].box_shape, &player.player_shape);
                     }
                 }
             }
@@ -540,11 +543,11 @@ int main()
                 }
 
                 // BOX
-                for (int j = 0; j < Levels[current_level].level_box_tiles.size(); j++)
+                for (int j = 0; j < Levels[current_level].level_boxes.size(); j++)
                 {
-                    if (Levels[current_level].level_box_tiles[j]->getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
+                    if (Levels[current_level].level_boxes[j].box_shape.getGlobalBounds().findIntersection(Levels[current_level].level_wall_tiles[i]->getGlobalBounds()))
                     {
-                        Collisions::ResolveXCollisions(Levels[current_level].level_box_tiles[j], Levels[current_level].level_wall_tiles[i]);
+                        Collisions::ResolveXCollisions(&Levels[current_level].level_boxes[j].box_shape, Levels[current_level].level_wall_tiles[i]);
                     }
                 }
             }
@@ -563,6 +566,7 @@ int main()
         window.clear();
         debug_window.clear();
         
+        // Debug_window events
         debug_window.draw(NewButton.m_ButtonShape);
         debug_window.draw(ResetButton);
 
@@ -585,6 +589,12 @@ int main()
             for (int i = 0; i < Levels[current_level].level_enemies.size(); i++)
             {
                 window.draw(Levels[current_level].level_enemies[i].enemy_shape);
+            }
+
+            // Draw all boxes
+            for (int i = 0; i < Levels[current_level].level_boxes.size(); i++)
+            {
+                window.draw(Levels[current_level].level_boxes[i].box_shape);
             }
 
             // Draw player object
@@ -620,6 +630,9 @@ int main()
             // Show credits if buttons were clicked
             if (show_credits) { window.draw(CreditsText); }
             window.draw(times_text);
+            sf::Text total_time_text(Font1, "Total: " + std::to_string(total_time), text_size);
+            total_time_text.setPosition({ 200.f, 500.f });
+            window.draw(total_time_text);
             
             // Game completion status
             sf::Text completion_text(Font1, "Game completed: false", text_size);

@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Box.obj",
+            "outputs": [
+                "Release\\Box.cpp.obj.dt.module.json",
+                "Release\\Box.cpp.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

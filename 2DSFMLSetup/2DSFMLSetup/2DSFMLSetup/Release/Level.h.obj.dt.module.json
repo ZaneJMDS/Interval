@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Level.obj",
+            "outputs": [
+                "Release\\Level.h.obj.dt.module.json",
+                "Release\\Level.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

@@ -187,20 +187,11 @@ void Level::LoadLevel()
 			// Box
 			if (level_array[x][y] == 'b')
 			{
-				// Spawn a box at current location
-				sf::RectangleShape* NewBox = new sf::RectangleShape({ 64, 64 });
-				NewBox->setPosition(sf::Vector2f(x * 64, y * 64));
-
-				// Location and size of texture
-				NewBox->setTextureRect(sf::IntRect({ 112, 48 }, { 16, 16 }));
-				NewBox->setTexture(&world_texture);
-
-				// Collider logic
-				level_box_tiles.push_back(NewBox);
-
-				// Remember starting position with box class 
-				Box boxlogic(NewBox);
-				level_boxes.push_back(boxlogic);
+				// Create a box at current location
+				sf::Vector2f start_pos(x * 64, y * 64);
+				Box NewBox(start_pos);
+				NewBox.box_shape.setTexture(&world_texture);
+				level_boxes.push_back(NewBox);
 			}
 
 			// Drum
@@ -287,7 +278,6 @@ void Level::LoadLevel()
 	level_tiles.push_back(level_wall_tiles);
 	level_tiles.push_back(level_platform_tiles);
 	level_tiles.push_back(level_drum_tiles);
-	level_tiles.push_back(level_box_tiles);
 	level_tiles.push_back(level_spike_tiles);
 	level_tiles.push_back(level_goal_tile);
 }
@@ -295,7 +285,10 @@ void Level::LoadLevel()
 void Level::UnloadLevel()
 {
 	// Get the player's final time
-	final_time = current_time;
+	if (current_time < final_time)
+	{
+		final_time = current_time;
+	}
 
 	// Clear out all the current tiles in the level
 	for (int i = 0; i < level_tiles.size(); i++)
@@ -319,7 +312,7 @@ void Level::Reset(Player* _player)
 	// Reset all the boxes
 	for (int i = 0; i < level_boxes.size(); i++)
 	{
-		level_boxes[i].ResetPosition(level_box_tiles[i]);
+		level_boxes[i].ResetPosition();
 	}
 
 	// Reset all the enemies
