@@ -12,7 +12,6 @@ File name   :   Level.h
 
 #include <SFML/Graphics.hpp>
 #include <fstream>
-#include <iostream>
 
 // Biomes
 enum terrain_types

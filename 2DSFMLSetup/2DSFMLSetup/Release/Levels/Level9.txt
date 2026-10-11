@@ -1,0 +1,10 @@
+   xxx    x x    xxx
+    x     x x    x
+    x     xxx    xxx
+    x     x x    x
+    x     x x    xxx
+xxx   xxx     xp
+x     x x     x x
+xxx   x x     x x
+x     x x b   xgx
+xxxppdx xpppppx
