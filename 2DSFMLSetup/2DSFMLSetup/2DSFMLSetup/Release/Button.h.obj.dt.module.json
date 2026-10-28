@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Button.obj",
+            "outputs": [
+                "Release\\Button.h.obj.dt.module.json",
+                "Release\\Button.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

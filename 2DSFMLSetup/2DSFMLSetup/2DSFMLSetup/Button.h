@@ -15,7 +15,6 @@ public:
 
 	Button(sf::Vector2f _position, sf::Color _color, sf::Text _text);
 	~Button();
-private:
 };
 
 

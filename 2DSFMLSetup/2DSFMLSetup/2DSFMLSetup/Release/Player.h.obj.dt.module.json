@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "Release\\Player.obj",
+            "outputs": [
+                "Release\\Player.h.obj.dt.module.json",
+                "Release\\Player.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}
