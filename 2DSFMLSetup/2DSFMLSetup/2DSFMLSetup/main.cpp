@@ -78,7 +78,7 @@ int main()
         // Makes button with location, colour, text 
         Button NewButton({550.f, 100.f * i + 200.f }, sf::Color::Green, button_roles[i]);
         buttons.push_back(NewButton);
-        button_roles[i].setPosition({ 560.f, 100.f * i + 210.f });
+        button_roles[i].setPosition({ 560.f, 100.f * i + 210.f }); // Text position
     }
 
     // Create debug buttons
